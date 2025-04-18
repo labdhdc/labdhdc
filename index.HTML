@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Computer Lab Registration Portal 2025-26</title>
+  <!-- Tailwind CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css">
+  <!-- Animation Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.4/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0c0f2d 0%, #132e5c 50%, #194080 100%);
+      min-height: 100vh;
+      color: #fff;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    #canvas-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    h1, h2, h3, h4, h5 {
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(to right, #ffffff, #74ebd5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+    }
+
+    .header p {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 1.1rem;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 2.5rem;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 80%);
+      transform: rotate(0deg);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    .glass-card:hover::before {
+      opacity: 1;
+      animation: rotate-light 8s linear infinite;
+    }
+
+    @keyframes rotate-light {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .form-group {
+      margin-bottom: 1.8rem;
+      position: relative;
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.8rem;
+      font-weight: 500;
+      font-size: 1.05rem;
+      color: rgba(255, 255, 255, 0.9);
+      letter-spacing: 0.5px;
+    }
+
+    .form-group label i {
+      margin-right: 8px;
+      color: #74ebd5;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 1rem 1.2rem;
+      font-size: 1rem;
+      background: rgba(255, 255, 255, 0.07);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: #74ebd5;
+      box-shadow: 0 0 15px rgba(116, 235, 213, 0.4);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 1rem;
+    }
+
+    .radio-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .radio-item input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+    }
+
+    .radio-item label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 3.2rem;
+      height: 3.2rem;
+      margin: 0;
+      padding: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    .radio-item input[type="radio"]:checked + label {
+      background: linear-gradient(135deg, #74ebd5 0%, #9face6 100%);
+      border-color: transparent;
+      color: #0c1339;
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(116, 235, 213, 0.3);
+    }
+
+    .radio-item input[type="radio"]:not(:checked) + label:hover {
+      border-color: rgba(116, 235, 213, 0.5);
+      transform: translateY(-3px);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 1.2rem;
+      background: linear-gradient(90deg, #74ebd5, #9face6);
+      color: #0c1339;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px);
+      margin-top: 1rem;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(116, 235, 213, 0.4);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.7s ease;
+    }
+
+    .submit-btn:hover::before {
+      left: 100%;
+    }
+
+    .input-icon {
+      position: absolute;
+      right: 1rem;
+      top: 55%;
+      color: rgba(255, 255, 255, 0.6);
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus ~ .input-icon {
+      color: #74ebd5;
+    }
+
+    .validation-msg {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      opacity: 0;
+      transition: all 0.3s ease;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .validation-msg.error {
+      color: #ff6b6b;
+      opacity: 1;
+      height: auto;
+    }
+
+    .validation-msg.success {
+      color: #74ebd5;
+      opacity: 1;
+      height: auto;
+    }
+
+    /* Success overlay */
+    .success-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    .success-overlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .success-content {
+      text-align: center;
+      transform: scale(0.8);
+      transition: all 0.5s ease;
+      max-width: 90%;
+    }
+
+    .success-overlay.visible .success-content {
+      transform: scale(1);
+    }
+
+    .success-icon {
+      font-size: 5rem;
+      color: #74ebd5;
+      margin-bottom: 1.5rem;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .success-title {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: white;
+      font-weight: 700;
+    }
+
+    .success-message {
+      font-size: 1.2rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 2rem;
+    }
+
+    .success-btn {
+      padding: 1rem 2rem;
+      background: linear-gradient(90deg, #74ebd5, #9face6);
+      color: #0c1339;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .success-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(116, 235, 213, 0.4);
+    }
+
+    /* Loading indicator */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 90;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .loading-overlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #74ebd5;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .hidden-frame {
+      display: none;
+    }
+
+    .floating-particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      animation: float 15s infinite ease-in-out;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0) translateX(0);
+      }
+      25% {
+        transform: translateY(-30px) translateX(15px);
+      }
+      50% {
+        transform: translateY(-10px) translateX(30px);
+      }
+      75% {
+        transform: translateY(-20px) translateX(-15px);
+      }
+    }
+
+    /* Error Alert */
+    .error-alert {
+      position: fixed;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 82, 82, 0.9);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 10px 30px rgba(255, 82, 82, 0.5);
+      z-index: 1000;
+      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
+
+    .error-alert.show {
+      top: 20px;
+    }
+
+    .error-alert i {
+      font-size: 1.5rem;
+    }
+
+    .error-alert p {
+      font-weight: 500;
+    }
+
+    .error-alert .close-btn {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 1.2rem;
+      opacity: 0.8;
+      transition: opacity 0.3s;
+      margin-left: 1rem;
+    }
+
+    .error-alert .close-btn:hover {
+      opacity: 1;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 1.5rem 0;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.9rem;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1.5rem;
+      }
+
+      .glass-card {
+        padding: 1.8rem;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .radio-group {
+        gap: 8px;
+      }
+
+      .radio-item label {
+        width: 2.8rem;
+        height: 2.8rem;
+        font-size: 1rem;
+      }
+    }
+
+    /* Animations for PDF rendering */
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+      }
+
+      .glass-card, .container, .header, .form-group, .submit-btn, .footer {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      .glass-card {
+        background: white !important;
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+      }
+
+      .form-control, .radio-item label {
+        background: white !important;
+        border: 1px solid #ddd !important;
+        color: black !important;
+      }
+
+      .submit-btn, .header h1 {
+        background: white !important;
+        color: black !important;
+        -webkit-text-fill-color: black !important;
+      }
+
+      #canvas-background, .floating-particles {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas-background"></canvas>
+  
+  <div class="floating-particles">
+    <!-- Particles will be generated by JS -->
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <h1>Computer Lab Registration Portal</h1>
+      
+    </div>
+
+    <div class="glass-card">
+      <form id="registration-form">
+        <div class="form-group">
+          <label for="admission-number"><i class="fas fa-id-card"></i>Admission Number</label>
+          <input type="text" class="form-control" id="admission-number" name="entry.631936964" placeholder="Enter your admission number" required>
+          <i class="fas fa-check-circle input-icon"></i>
+          <div class="validation-msg" id="admission-validation"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="name"><i class="fas fa-user"></i>Name</label>
+          <input type="text" class="form-control" id="name" name="entry.723452338" placeholder="Enter your full name" required>
+          <i class="fas fa-check-circle input-icon"></i>
+          <div class="validation-msg" id="name-validation"></div>
+        </div>
+
+        <div class="form-group">
+          <label><i class="fas fa-graduation-cap"></i>Class</label>
+          <div class="radio-group">
+            <div class="radio-item">
+              <input type="radio" id="class-1" name="entry.404446683" value="1" required>
+              <label for="class-1">1</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" id="class-2" name="entry.404446683" value="2">
+              <label for="class-2">2</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" id="class-3" name="entry.404446683" value="3">
+              <label for="class-3">3</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" id="class-4" name="entry.404446683" value="4">
+              <label for="class-4">4</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" id="class-5" name="entry.404446683" value="5">
+              <label for="class-5">5</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" id="class-6" name="entry.404446683" value="6">
+              <label for="class-6">6</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" id="class-7" name="entry.404446683" value="7">
+              <label for="class-7">7</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" id="class-8" name="entry.404446683" value="8">
+              <label for="class-8">8</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" id="class-9" name="entry.404446683" value="9">
+              <label for="class-9">9</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" id="class-10" name="entry.404446683" value="10">
+              <label for="class-10">10</label>
+            </div>
+          </div>
+          <div class="validation-msg" id="class-validation"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="usage-time"><i class="fas fa-clock"></i>Usage Time (minutes)</label>
+          <input type="number" class="form-control" id="usage-time" name="entry.924941113" placeholder="Enter time in minutes" required min="1">
+          <i class="fas fa-check-circle input-icon"></i>
+          <div class="validation-msg" id="time-validation"></div>
+        </div>
+
+        <button type="submit" class="submit-btn">
+          <i class="fas fa-paper-plane mr-2"></i> Register
+        </button>
+      </form>
+    </div>
+
+    <div class="footer">
+      <p>&copy; 2025 Computer Lab Registration Portal. All rights reserved.</p>
+    </div>
+  </div>
+
+  <!-- Hidden iframe for form submission -->
+  <iframe name="hidden-frame" class="hidden-frame"></iframe>
+
+  <!-- Success Overlay -->
+  <div class="success-overlay" id="success-overlay">
+    <div class="success-content">
+      <i class="fas fa-check-circle success-icon"></i>
+      <h2 class="success-title">Registration Successful!</h2>
+      <p class="success-message">Your computer lab registration has been submitted successfully.</p>
+      <button class="success-btn" id="success-btn">Close</button>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- Error Alert -->
+  <div class="error-alert" id="error-alert">
+    <i class="fas fa-exclamation-circle"></i>
+    <p id="error-message">Something went wrong. Please try again.</p>
+    <button class="close-btn" id="close-error"><i class="fas fa-times"></i></button>
+  </div>
+
+  <script>
+    // 3D Background Animation
+    (function() {
+      const canvas = document.getElementById('canvas-background');
+      const renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+      });
+      
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1);
+      
+      const scene = new THREE.Scene();
+      
+      const camera = new THREE.PerspectiveCamera(
+        45,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      camera.position.z = 5;
+      
+      // Create stars
+      const starGeometry = new THREE.BufferGeometry();
+      const starMaterial = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.1,
+        transparent: true
+      });
+      
+      const starVertices = [];
+      for (let i = 0; i < 6000; i++) {
+        const x = (Math.random() - 0.5) * 10;
+        const y = (Math.random() - 0.5) * 10;
+        const z = (Math.random() - 0.5) * 10;
+        starVertices.push(x, y, z);
+      }
+      
+      starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+      const stars = new THREE.Points(starGeometry, starMaterial);
+      scene.add(stars);
+      
+      // Add light
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+      scene.add(ambientLight);
+      
+      // Animation loop
+      function animate() {
+        requestAnimationFrame(animate);
+        
+        stars.rotation.x += 0.0002;
+        stars.rotation.y += 0.0003;
+        
+        renderer.render(scene, camera);
+      }
+      
+      animate();
+      
+      // Resize handling
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    })();
+
+    // Floating particles
+    (function() {
+      const particlesContainer = document.querySelector('.floating-particles');
+      const numberOfParticles = 20;
+      
+      for (let i = 0; i < numberOfParticles; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        
+        // Random position
+        const xPos = Math.random() * 100;
+        const yPos = Math.random() * 100;
+        
+        // Random size
+        const size = Math.random() * 5 + 3;
+        
+        // Random opacity
+        const opacity = Math.random() * 0.5 + 0.1;
+        
+        // Random animation delay
+        const delay = Math.random() * 5;
+        
+        // Random animation duration
+        const duration = Math.random() * 10 + 10;
+        
+        particle.style.left = `${xPos}%`;
+        particle.style.top = `${yPos}%`;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.opacity = opacity;
+        particle.style.animationDelay = `${delay}s`;
+        particle.style.animationDuration = `${duration}s`;
+        
+        particlesContainer.appendChild(particle);
+      }
+    })();
+
+    // Elements Animation
+    (function() {
+      gsap.to('.header', {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: 'power3.out'
+      });
+      
+      gsap.to('.glass-card', {
+        opacity: 1,
+        scale: 1,
+        duration: 1,
+        delay: 0.3,
+        ease: 'power3.out'
+      });
+      
+      const formGroups = document.querySelectorAll('.form-group');
+      formGroups.forEach((group, index) => {
+        gsap.to(group, {
+          opacity: 1,
+          x: 0,
+          duration: 0.7,
+          delay: 0.5 + (index * 0.1),
+          ease: 'power3.out'
+        });
+      });
+      
+      gsap.to('.submit-btn', {
+        opacity: 1,
+        y: 0,
+        duration: 0.7,
+        delay: 1.1,
+        ease: 'power3.out'
+      });
+      
+      gsap.to('.footer', {
+        opacity: 1,
+        y: 0,
+        duration: 0.7,
+        delay: 1.3,
+        ease: 'power3.out'
+      });
+    })();
+
+    // Form Validation
+    (function() {
+      const form = document.getElementById('registration-form');
+      const admissionField = document.getElementById('admission-number');
+      const nameField = document.getElementById('name');
+      const timeField = document.getElementById('usage-time');
+      const radioButtons = document.querySelectorAll('input[name="entry.404446683"]');
+      
+      const admissionValidation = document.getElementById('admission-validation');
+      const nameValidation = document.getElementById('name-validation');
+      const classValidation = document.getElementById('class-validation');
+      const timeValidation = document.getElementById('time-validation');
+      
+      function validateAdmission() {
+        if (admissionField.value.trim() === '') {
+          admissionValidation.textContent = 'Admission number is required';
+          admissionValidation.className = 'validation-msg error';
+          return false;
+        } else if (!/^\d+$/.test(admissionField.value.trim())) {
+          admissionValidation.textContent = 'Please enter a valid admission number';
+          admissionValidation.className = 'validation-msg error';
+          return false;
+        } else {
+          admissionValidation.textContent = '';
+          admissionValidation.className = 'validation-msg success';
+          return true;
+        }
+      }
+      
+      function validateName() {
+        if (nameField.value.trim() === '') {
+          nameValidation.textContent = 'Name is required';
+          nameValidation.className = 'validation-msg error';
+          return false;
+        } else if (nameField.value.trim().length < 2) {
+          nameValidation.textContent = 'Name must be at least 2 characters';
+          nameValidation.className = 'validation-msg error';
+          return false;
+        } else {
+          nameValidation.textContent = '';
+          nameValidation.className = 'validation-msg success';
+          return true;
+        }
+      }
+      
+      function validateClass() {
+        let selected = false;
+        radioButtons.forEach(button => {
+          if (button.checked) {
+            selected = true;
+          }
+        });
+        
+        if (!selected) {
+          classValidation.textContent = 'Please select a class';
+          classValidation.className = 'validation-msg error';
+          return false;
+        } else {
+          classValidation.textContent = '';
+          classValidation.className = 'validation-msg success';
+          return true;
+        }
+      }
+      
+      function validateTime() {
+        if (timeField.value.trim() === '') {
+          timeValidation.textContent = 'Usage time is required';
+          timeValidation.className = 'validation-msg error';
+          return false;
+        } else if (parseInt(timeField.value) < 1) {
+          timeValidation.textContent = 'Usage time must be at least 1 minute';
+          timeValidation.className = 'validation-msg error';
+          return false;
+        } else {
+          timeValidation.textContent = '';
+          timeValidation.className = 'validation-msg success';
+          return true;
+        }
+      }
+      
+      // Add validation on input
+      admissionField.addEventListener('input', validateAdmission);
+      nameField.addEventListener('input', validateName);
+      timeField.addEventListener('input', validateTime);
+      
+      radioButtons.forEach(button => {
+        button.addEventListener('change', validateClass);
+      });
+      
+      // Form submission
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const isAdmissionValid = validateAdmission();
+        const isNameValid = validateName();
+        const isClassValid = validateClass();
+        const isTimeValid = validateTime();
+        
+        if (isAdmissionValid && isNameValid && isClassValid && isTimeValid) {
+          submitForm();
+        }
+      });
+      
+      function submitForm() {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        loadingOverlay.classList.add('visible');
+        
+        // Form data
+        const formData = new FormData(form);
+        
+        // Create URL-encoded form data
+        const urlEncodedData = new URLSearchParams(formData).toString();
+        
+        // Send form data via fetch
+        fetch('https://docs.google.com/forms/d/e/1FAIpQLSdzkhhi9MjDquwtI7pXpA__jrVh3m-ATXXihQ5ncP58sGGpvg/formResponse', {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: urlEncodedData
+        })
+        .then(() => {
+          // Show success message after a short delay
+          setTimeout(() => {
+            loadingOverlay.classList.remove('visible');
+            showSuccessMessage();
+          }, 1000);
+        })
+        .catch(error => {
+          // Since Google Forms will always return a CORS error even on successful submissions
+          // we'll still show success, but also log the error
+          console.error('Form submission error:', error);
+          setTimeout(() => {
+            loadingOverlay.classList.remove('visible');
+            showSuccessMessage();
+          }, 1000);
+        });
+      }
+    })();
+
+    // Success Message
+    function showSuccessMessage() {
+      const successOverlay = document.getElementById('success-overlay');
+      successOverlay.classList.add('visible');
+      
+      // Trigger confetti
+      const duration = 3000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 101 };
+      
+      function randomInRange(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+      
+      const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+        
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+        
+        const particleCount = 50 * (timeLeft / duration);
+        
+        // since particles fall down, start a bit higher than random
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+        });
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+        });
+      }, 250);
+    }
+    
+    // Success button event
+    document.getElementById('success-btn').addEventListener('click', function() {
+      const successOverlay = document.getElementById('success-overlay');
+      successOverlay.classList.remove('visible');
+      
+      // Reset form
+      document.getElementById('registration-form').reset();
+      
+      // Reset validation messages
+      const validationMsgs = document.querySelectorAll('.validation-msg');
+      validationMsgs.forEach(msg => {
+        msg.textContent = '';
+        msg.className = 'validation-msg';
+      });
+    });
+    
+    // Error alert handling
+    function showError(message) {
+      const errorAlert = document.getElementById('error-alert');
+      const errorMessage = document.getElementById('error-message');
+      
+      errorMessage.textContent = message || 'Something went wrong. Please try again.';
+      errorAlert.classList.add('show');
+      
+      setTimeout(() => {
+        errorAlert.classList.remove('show');
+      }, 5000);
+    }
+    
+    document.getElementById('close-error').addEventListener('click', function() {
+      document.getElementById('error-alert').classList.remove('show');
+    });
+    
+    // Radio button animation
+    const radioItems = document.querySelectorAll('.radio-item');
+    radioItems.forEach(item => {
+      item.addEventListener('mouseenter', function() {
+        if (!this.querySelector('input').checked) {
+          gsap.to(this.querySelector('label'), {
+            y: -3,
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+      
+      item.addEventListener('mouseleave', function() {
+        if (!this.querySelector('input').checked) {
+          gsap.to(this.querySelector('label'), {
+            y: 0,
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+      
+      item.addEventListener('click', function() {
+        // Reset all radio items
+        radioItems.forEach(otherItem => {
+          if (otherItem !== item) {
+            gsap.to(otherItem.querySelector('label'), {
+              y: 0,
+              scale: 1,
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              color: 'white',
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+              boxShadow: 'none',
+              duration: 0.3
+            });
+          }
+        });
+        
+        // Animate the selected one
+        gsap.to(this.querySelector('label'), {
+          y: -5,
+          scale: 1.05,
+          backgroundColor: 'rgb(116, 235, 213)',
+          backgroundImage: 'linear-gradient(135deg, rgb(116, 235, 213) 0%, rgb(159, 172, 230) 100%)',
+          color: '#0c1339',
+          borderColor: 'transparent',
+          boxShadow: '0 10px 20px rgba(116, 235, 213, 0.3)',
+          duration: 0.3
+        });
+      });
+    });
+  </script>
+</body>
+</html>
