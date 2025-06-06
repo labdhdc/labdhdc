@@ -683,6 +683,82 @@
   </div>
 
   <script>
+    // Audio Context for Sound Effects
+    let audioContext;
+    
+    function initAudioContext() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    // Success Sound Effect
+    function playSuccessSound() {
+      initAudioContext();
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Create a pleasant success chime
+      oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+      oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+      oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+      
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      
+      oscillator.type = 'sine';
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
+    }
+
+    // Error Sound Effect
+    function playErrorSound() {
+      initAudioContext();
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Create an error buzz sound
+      oscillator.frequency.setValueAtTime(220, audioContext.currentTime); // A3
+      oscillator.frequency.setValueAtTime(196, audioContext.currentTime + 0.1); // G3
+      oscillator.frequency.setValueAtTime(174.61, audioContext.currentTime + 0.2); // F3
+      
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+      
+      oscillator.type = 'sawtooth';
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.4);
+    }
+
+    // Click Sound Effect
+    function playClickSound() {
+      initAudioContext();
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+      
+      oscillator.type = 'square';
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1);
+    }
+
     // 3D Background Animation
     (function() {
       const canvas = document.getElementById('canvas-background');
@@ -930,6 +1006,8 @@
         
         if (isAdmissionValid && isNameValid && isClassValid && isTimeValid) {
           submitForm();
+        } else {
+          playErrorSound();
         }
       });
       
@@ -973,6 +1051,8 @@
 
     // Success Message
     function showSuccessMessage() {
+      playSuccessSound();
+      
       const successOverlay = document.getElementById('success-overlay');
       successOverlay.classList.add('visible');
       
@@ -1010,6 +1090,8 @@
     
     // Success button event
     document.getElementById('success-btn').addEventListener('click', function() {
+      playClickSound();
+      
       const successOverlay = document.getElementById('success-overlay');
       successOverlay.classList.remove('visible');
       
@@ -1026,6 +1108,8 @@
     
     // Error alert handling
     function showError(message) {
+      playErrorSound();
+      
       const errorAlert = document.getElementById('error-alert');
       const errorMessage = document.getElementById('error-message');
       
@@ -1038,6 +1122,7 @@
     }
     
     document.getElementById('close-error').addEventListener('click', function() {
+      playClickSound();
       document.getElementById('error-alert').classList.remove('show');
     });
     
@@ -1065,6 +1150,8 @@
       });
       
       item.addEventListener('click', function() {
+        playClickSound();
+        
         // Reset all radio items
         radioItems.forEach(otherItem => {
           if (otherItem !== item) {
@@ -1091,6 +1178,18 @@
           boxShadow: '0 10px 20px rgba(116, 235, 213, 0.3)',
           duration: 0.3
         });
+      });
+    });
+
+    // Add sound effects to buttons and interactive elements
+    document.querySelector('.submit-btn').addEventListener('click', function() {
+      playClickSound();
+    });
+
+    // Add click sounds to form inputs
+    document.querySelectorAll('.form-control').forEach(input => {
+      input.addEventListener('focus', function() {
+        playClickSound();
       });
     });
   </script>
