@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Device Usage Registration</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Courier New',Courier,monospace;}
+:root{
+  --g:#00ff41;--gd:#00c832;--gg:rgba(0,255,65,0.22);
+  --bg:#080d08;--cbg:#0c120c;--br:rgba(0,255,65,0.28);
+  --bri:rgba(0,255,65,0.65);--dim:rgba(0,255,65,0.45);--red:#ff4040;
+}
+html,body{min-height:100%;background:var(--bg);}
+body{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;padding:32px 14px;position:relative;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(0,255,65,0.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,65,0.035) 1px,transparent 1px);
+  background-size:36px 36px;
+}
+.wrap{width:100%;max-width:460px;position:relative;z-index:10;}
+.win{
+  background:#0c120c;border:1px solid var(--bri);border-radius:6px;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(0,255,65,0.08),0 0 40px rgba(0,255,65,0.1),
+    0 0 80px rgba(0,255,65,0.05),inset 0 0 50px rgba(0,0,0,0.4);
+}
+.tbar{
+  background:#0a0f0a;border-bottom:1px solid var(--br);
+  padding:10px 16px;display:flex;align-items:center;gap:8px;
+}
+.dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.dr{background:#ff5f57;box-shadow:0 0 5px #ff5f57;}
+.dy{background:#febc2e;box-shadow:0 0 5px #febc2e;}
+.dg{background:#28c840;box-shadow:0 0 5px #28c840;}
+.ttl{flex:1;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.07em;margin-right:36px;}
+.tbody{padding:22px 26px 28px;}
+.pline{color:var(--g);font-size:12px;line-height:1.75;}
+.psym{color:var(--gd);}
+.pcmd{color:#fff;}
+.pflag{color:#7dd3fc;}
+.pstr{color:#fbbf24;}
+.ascii{color:var(--gd);font-size:9.5px;line-height:1.3;margin:10px 0 14px;opacity:.65;white-space:pre;}
+.pinfo{font-size:11px;color:var(--dim);margin-bottom:18px;}
+.pinfo .ok{color:var(--g);}
+.stitle{
+  color:var(--g);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  border-bottom:1px solid var(--br);padding-bottom:7px;margin-bottom:18px;
+}
+.stitle::before{content:'// ';color:var(--dim);}
+.fg{margin-bottom:16px;}
+.lbl{display:block;font-size:10px;color:var(--dim);letter-spacing:.09em;text-transform:uppercase;margin-bottom:5px;}
+.lbl::before{content:'> ';color:var(--gd);}
+.req{color:var(--g);}
+input.fi,select.fi{
+  width:100%;padding:9px 12px;background:#060b06;border:1px solid var(--br);
+  border-radius:2px;font-size:12px;color:var(--g);
+  font-family:'Courier New',monospace;outline:none;
+  transition:border-color .2s,box-shadow .2s;caret-color:var(--g);
+}
+input.fi::placeholder{color:rgba(0,255,65,0.18);}
+input.fi:hover,select.fi:hover{border-color:rgba(0,255,65,0.48);}
+input.fi:focus,select.fi:focus{border-color:var(--g);box-shadow:0 0 0 2px var(--gg);}
+input.fi.err,select.fi.err{border-color:var(--red);box-shadow:0 0 0 2px rgba(255,64,64,.18);}
+select.fi{
+  appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%2300ff41' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 11px center;padding-right:32px;
+}
+select.fi option{background:#0c120c;color:var(--g);}
+.fnote{font-size:10px;color:var(--dim);margin-top:4px;}
+.fnote::before{content:'# ';color:rgba(0,255,65,.25);}
+.emsg{color:var(--red);font-size:10px;margin-top:3px;display:none;letter-spacing:.02em;}
+.emsg.show{display:block;}
+.bsub{
+  width:100%;padding:12px;background:transparent;border:1px solid var(--g);
+  color:var(--g);font-family:'Courier New',monospace;font-size:12px;font-weight:700;
+  letter-spacing:.09em;text-transform:uppercase;border-radius:2px;cursor:pointer;
+  transition:all .2s;position:relative;overflow:hidden;
+}
+.bsub::before{content:'';position:absolute;inset:0;background:var(--g);opacity:0;transition:opacity .2s;}
+.bsub:hover{box-shadow:0 0 18px var(--gg);}
+.bsub:hover::before{opacity:1;}
+.bsub:hover .bspan{position:relative;z-index:1;color:#000;}
+.bsub:active{transform:scale(.99);}
+.bsub:disabled{opacity:.35;cursor:not-allowed;}
+.spin{
+  display:inline-block;width:13px;height:13px;
+  border:2px solid rgba(0,255,65,.2);border-top-color:var(--g);
+  border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.succ{display:none;text-align:center;padding:10px 0;}
+.ok-art{
+  color:var(--g);font-size:10.5px;line-height:1.35;white-space:pre;
+  margin-bottom:14px;animation:glow 2s ease-in-out infinite alternate;
+}
+@keyframes glow{
+  from{text-shadow:0 0 4px var(--gg);}
+  to{text-shadow:0 0 18px var(--g),0 0 36px rgba(0,255,65,.28);}
+}
+.smsg{color:var(--g);font-size:12px;margin-bottom:5px;}
+.ssub{color:var(--dim);font-size:10px;margin-bottom:22px;letter-spacing:.04em;}
+.bagain{
+  padding:9px 26px;background:transparent;border:1px solid var(--br);
+  color:var(--dim);font-family:'Courier New',monospace;font-size:11px;
+  letter-spacing:.07em;border-radius:2px;cursor:pointer;transition:all .2s;
+}
+.bagain:hover{border-color:var(--g);color:var(--g);box-shadow:0 0 10px var(--gg);}
+.foot{text-align:center;font-size:10px;color:rgba(0,255,65,.18);margin-top:10px;letter-spacing:.05em;}
+.typed{overflow:hidden;white-space:nowrap;animation:type .7s steps(40,end) both;}
+@keyframes type{from{width:0;}to{width:100%;}}
+@keyframes fadein{from{opacity:0;transform:translateX(-6px);}to{opacity:1;transform:none;}}
+.fg:nth-child(1){animation:fadein .4s .05s both;}
+.fg:nth-child(2){animation:fadein .4s .1s both;}
+.fg:nth-child(3){animation:fadein .4s .15s both;}
+.fg:nth-child(4){animation:fadein .4s .2s both;}
+.fg:nth-child(5){animation:fadein .4s .25s both;}
+</style>
+</head>
+<body>
+<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+<div class="wrap">
+  <div class="win">
+    <div class="tbar">
+      <span class="dot dr"></span>
+      <span class="dot dy"></span>
+      <span class="dot dg"></span>
+      <span class="ttl">bash &mdash; device-usage-registration &mdash; 80&times;24</span>
+    </div>
+    <div class="tbody">
+      <div class="pline typed"><span class="psym">user@sys:~$</span><span class="pcmd"> ./register-device</span><span class="pflag"> --log</span><span class="pstr"> "session"</span></div>
+      <pre class="ascii"> ____  _______  ___  ___  ___  __  __
+|  _ \| ____\ \/ / |/ _ \|_ _|/ _|/ _|
+| |_) |  _|  \  /  | | | || || |_| |_
+|  _ &lt; | |___ /  \  | |_| || ||  _|  _|
+|_| \_\|_____/_/\_\  \___/|___|_| |_|</pre>
+      <div class="pinfo">Initializing session logger v2.4.1... <span class="ok">OK</span></div>
+      <div class="stitle">Input Required</div>
+      <div id="form-state">
+        <form id="google-form"
+          action="https://docs.google.com/forms/d/e/1FAIpQLScPlJSl-hlGHnHCNSruBIXLRw8kQKHT45ECl3FF3zwYVBHR7A/formResponse"
+          method="POST" target="hidden_iframe" onsubmit="handleSubmit(event)" novalidate>
+          <div class="fg">
+            <label class="lbl" for="admission">Admission Number <span class="req">*</span></label>
+            <input type="text" id="admission" name="entry.788313910" class="fi" placeholder="ADM2024001" autocomplete="off"/>
+            <p class="emsg" id="err-admission">&#10006; Please enter your admission number.</p>
+          </div>
+          <div class="fg">
+            <label class="lbl" for="name">Full Name <span class="req">*</span></label>
+            <input type="text" id="name" name="entry.1141935053" class="fi" placeholder="Enter your full name" autocomplete="name"/>
+            <p class="emsg" id="err-name">&#10006; Please enter your full name.</p>
+          </div>
+          <div class="fg">
+            <label class="lbl" for="class">Class <span class="req">*</span></label>
+            <select id="class" name="entry.2105409516" class="fi">
+              <option value="" disabled selected>-- select class --</option>
+              <option value="1">Class 1</option><option value="2">Class 2</option>
+              <option value="3">Class 3</option><option value="4">Class 4</option>
+              <option value="5">Class 5</option><option value="6">Class 6</option>
+              <option value="7">Class 7</option><option value="8">Class 8</option>
+              <option value="9">Class 9</option><option value="10">Class 10</option>
+            </select>
+            <p class="emsg" id="err-class">&#10006; Please select your class.</p>
+          </div>
+          <div class="fg" style="margin-bottom:22px;">
+            <label class="lbl" for="usage">Usage Time <span class="req">*</span></label>
+            <input type="number" id="usage" name="entry.757812599" class="fi" placeholder="30" min="1" max="600"/>
+            <p class="fnote">Enter duration in minutes only.</p>
+            <p class="emsg" id="err-usage">&#10006; Please enter a valid usage time in minutes.</p>
+          </div>
+          <div class="fg">
+            <button type="submit" id="submit-btn" class="bsub">
+              <span class="bspan" id="btn-text">[ Execute: Submit Registration ]</span>
+              <span id="btn-loader" style="display:none;"><span class="spin"></span>&nbsp;Submitting...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+      <div class="succ" id="success-state">
+        <pre class="ok-art">
+  &#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2557; &#x2588;&#x2588;&#x2557;  &#x2588;&#x2588;&#x2557;
+ &#x2588;&#x2588;&#x2554;&#x2550;&#x2550;&#x2550;&#x2588;&#x2588;&#x2557;&#x2588;&#x2588;&#x2551; &#x2588;&#x2588;&#x2554;&#x255D;
+ &#x2588;&#x2588;&#x2551;   &#x2588;&#x2588;&#x2551;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2554;&#x255D;
+ &#x2588;&#x2588;&#x2551;   &#x2588;&#x2588;&#x2551;&#x2588;&#x2588;&#x2554;&#x2550;&#x2588;&#x2588;&#x2557;
+ &#x255A;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2554;&#x255D;&#x2588;&#x2588;&#x2551;  &#x2588;&#x2588;&#x2557;
+  &#x255A;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x255D; &#x255A;&#x2550;&#x255D;  &#x255A;&#x2550;&#x255D;</pre>
+        <p class="smsg">[ STATUS: 200 OK ] Session logged successfully.</p>
+        <p class="ssub">// Device usage recorded. Thank you.</p>
+        <button class="bagain" onclick="resetForm()">&#x21A9; register --new-session</button>
+      </div>
+    </div>
+  </div>
+  <p class="foot">SECURED &middot; POWERED BY GOOGLE FORMS &middot; TTY1</p>
+</div>
+<script>
+function validate(){
+  var ok=true;
+  [{id:'admission',e:'err-admission',fn:function(v){return v.trim()!=='';}},
+   {id:'name',e:'err-name',fn:function(v){return v.trim().length>1;}},
+   {id:'class',e:'err-class',fn:function(v){return v!=='';}},
+   {id:'usage',e:'err-usage',fn:function(v){return v.trim()!==''&&Number(v)>0;}}
+  ].forEach(function(f){
+    var el=document.getElementById(f.id),er=document.getElementById(f.e);
+    if(!f.fn(el.value)){el.classList.add('err');er.classList.add('show');ok=false;}
+    else{el.classList.remove('err');er.classList.remove('show');}
+  });
+  return ok;
+}
+['admission','name','class','usage'].forEach(function(id){
+  document.getElementById(id).addEventListener('input',function(){
+    this.classList.remove('err');
+    document.getElementById('err-'+id).classList.remove('show');
+  });
+});
+function handleSubmit(e){
+  if(!validate()){e.preventDefault();return;}
+  document.getElementById('btn-text').style.display='none';
+  document.getElementById('btn-loader').style.display='inline';
+  document.getElementById('submit-btn').disabled=true;
+  setTimeout(showSuccess,1800);
+}
+function showSuccess(){
+  document.getElementById('form-state').style.display='none';
+  document.getElementById('success-state').style.display='block';
+}
+function resetForm(){
+  document.getElementById('google-form').reset();
+  document.getElementById('submit-btn').disabled=false;
+  document.getElementById('btn-text').style.display='inline';
+  document.getElementById('btn-loader').style.display='none';
+  ['admission','name','class','usage'].forEach(function(id){
+    document.getElementById(id).classList.remove('err');
+    document.getElementById('err-'+id).classList.remove('show');
+  });
+  document.getElementById('success-state').style.display='none';
+  document.getElementById('form-state').style.display='block';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Device Usage Registration</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  min-height:100vh;
+  background-color:#d4c9a8;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23d4c9a8'/%3E%3Crect width='1' height='1' x='0' y='0' fill='%23c8bc9a' opacity='.4'/%3E%3Crect width='1' height='1' x='2' y='2' fill='%23c8bc9a' opacity='.3'/%3E%3C/svg%3E");
+  display:flex;align-items:center;justify-content:center;
+  padding:32px 16px;
+  font-family:'Courier Prime',Courier,monospace;
+}
+
+/* Paper card */
+.paper{
+  width:100%;max-width:480px;
+  background:#f5f0e4;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 27px,
+      rgba(180,160,100,0.18) 27px,
+      rgba(180,160,100,0.18) 28px
+    );
+  border-radius:2px;
+  box-shadow:
+    0 1px 1px rgba(0,0,0,.15),
+    0 3px 6px rgba(0,0,0,.12),
+    0 8px 24px rgba(0,0,0,.1),
+    4px 4px 0 #c8b88a,
+    5px 5px 0 #b8a87a;
+  padding:40px 44px 44px;
+  position:relative;
+  border-top:1px solid #e8e0cc;
+}
+
+/* Torn top edge */
+.paper::before{
+  content:'';
+  position:absolute;top:-2px;left:0;right:0;height:4px;
+  background:repeating-linear-gradient(90deg,
+    #f5f0e4 0px,#f5f0e4 8px,
+    transparent 8px,transparent 10px,
+    #f5f0e4 10px,#f5f0e4 16px,
+    transparent 16px,transparent 19px
+  );
+}
+
+/* Red left margin line */
+.paper::after{
+  content:'';
+  position:absolute;top:0;bottom:0;left:52px;
+  width:1px;
+  background:rgba(200,80,80,0.35);
+}
+
+/* Header */
+.hdr{text-align:center;margin-bottom:28px;}
+.stamp{
+  display:inline-block;
+  border:3px double #5a4a2a;
+  padding:6px 18px;
+  font-family:'Special Elite',cursive;
+  font-size:19px;
+  color:#2a1f0a;
+  letter-spacing:.08em;
+  margin-bottom:10px;
+  position:relative;
+  transform:rotate(-1deg);
+}
+.stamp::before{
+  content:'';
+  position:absolute;inset:-6px;
+  border:1px solid rgba(90,74,42,0.3);
+}
+.subtitle{
+  font-family:'Courier Prime',monospace;
+  font-size:11px;
+  color:#7a6a4a;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  font-style:italic;
+  margin-top:6px;
+}
+
+/* Divider */
+.rule{
+  border:none;
+  border-top:1px solid #c0aa80;
+  margin:0 0 22px;
+  position:relative;
+}
+.rule::after{
+  content:'* * *';
+  position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+  background:#f5f0e4;padding:0 8px;
+  font-size:11px;color:#a09070;letter-spacing:.2em;
+}
+
+/* Field */
+.fg{margin-bottom:16px;position:relative;}
+.lbl{
+  display:block;
+  font-family:'Special Elite',cursive;
+  font-size:12px;
+  color:#4a3a1a;
+  margin-bottom:5px;
+  letter-spacing:.05em;
+}
+.lbl .num{color:#c08060;margin-right:4px;}
+.req{color:#b04030;}
+
+/* Inputs */
+input.fi,select.fi{
+  width:100%;
+  padding:6px 8px;
+  background:transparent;
+  border:none;
+  border-bottom:2px solid #a09070;
+  font-family:'Courier Prime',monospace;
+  font-size:13px;
+  color:#2a1a0a;
+  outline:none;
+  transition:border-color .2s;
+  border-radius:0;
+  -webkit-appearance:none;
+}
+input.fi::placeholder{color:#b8a888;font-style:italic;}
+input.fi:focus,select.fi:focus{border-bottom-color:#5a3a1a;}
+input.fi.err,select.fi.err{border-bottom-color:#b04030;}
+select.fi{
+  cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a09070' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 4px center;padding-right:24px;
+}
+select.fi option{background:#f5f0e4;color:#2a1a0a;}
+
+/* Underline decoration */
+.fi-line{height:1px;background:rgba(160,140,110,0.3);margin-top:1px;}
+
+.fnote{font-size:10px;color:#907860;margin-top:4px;font-style:italic;}
+.emsg{color:#b04030;font-size:10px;margin-top:3px;display:none;font-style:italic;}
+.emsg.show{display:block;}
+
+/* Submit */
+.btn-area{margin-top:26px;text-align:center;}
+.bsub{
+  display:inline-block;
+  padding:10px 36px;
+  background:transparent;
+  border:2px solid #5a3a1a;
+  font-family:'Special Elite',cursive;
+  font-size:13px;
+  color:#2a1a0a;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  cursor:pointer;
+  position:relative;
+  transition:all .2s;
+  overflow:hidden;
+}
+.bsub::before{
+  content:'';
+  position:absolute;inset:3px;
+  border:1px solid rgba(90,58,26,0.3);
+  pointer-events:none;
+}
+.bsub:hover{background:#5a3a1a;color:#f5f0e4;}
+.bsub:active{transform:scale(.98);}
+.bsub:disabled{opacity:.5;cursor:default;}
+
+/* Spinner */
+.spin{
+  display:inline-block;width:12px;height:12px;
+  border:2px solid rgba(90,58,26,0.2);border-top-color:#5a3a1a;
+  border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Success */
+.succ{display:none;text-align:center;padding:10px 0;}
+.ok-stamp{
+  display:inline-block;
+  border:4px double #2a7a2a;
+  padding:8px 22px;
+  font-family:'Special Elite',cursive;
+  font-size:22px;
+  color:#2a7a2a;
+  letter-spacing:.12em;
+  transform:rotate(-3deg);
+  box-shadow:2px 2px 0 rgba(42,122,42,0.2);
+  margin-bottom:16px;
+  opacity:.85;
+}
+.succ-msg{font-family:'Courier Prime',monospace;font-size:12px;color:#4a3a1a;line-height:1.7;margin-bottom:18px;}
+.bagain{
+  background:transparent;border:none;border-bottom:1px solid #a09070;
+  font-family:'Special Elite',cursive;font-size:12px;color:#7a5a2a;
+  cursor:pointer;padding:2px 4px;letter-spacing:.06em;
+}
+.bagain:hover{color:#2a1a0a;border-bottom-color:#5a3a1a;}
+
+/* Footer */
+.foot{
+  text-align:center;margin-top:18px;
+  font-family:'Courier Prime',monospace;
+  font-size:9px;color:#a09070;letter-spacing:.1em;text-transform:uppercase;
+}
+
+/* Key strike marks (decorative) */
+.keystrike{
+  position:absolute;right:-8px;top:8px;
+  font-family:'Special Elite',cursive;
+  font-size:9px;color:rgba(160,130,80,0.4);
+  transform:rotate(90deg);letter-spacing:.05em;
+}
+</style>
+</head>
+<body>
+<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+
+<div class="paper">
+  <!-- Header -->
+  <div class="hdr">
+    <div class="stamp">Device Usage Log</div>
+    <div class="subtitle">&#8212;&nbsp;Registration Form&nbsp;&#8212;</div>
+  </div>
+
+  <hr class="rule"/>
+
+  <!-- FORM STATE -->
+  <div id="form-state">
+    <form id="google-form"
+      action="https://docs.google.com/forms/d/e/1FAIpQLScPlJSl-hlGHnHCNSruBIXLRw8kQKHT45ECl3FF3zwYVBHR7A/formResponse"
+      method="POST" target="hidden_iframe" onsubmit="handleSubmit(event)" novalidate>
+
+      <div class="fg">
+        <label class="lbl" for="admission"><span class="num">1.</span> Admission Number <span class="req">*</span></label>
+        <input type="text" id="admission" name="entry.788313910" class="fi" placeholder="e.g. ADM2024001" autocomplete="off"/>
+        <div class="fi-line"></div>
+        <p class="emsg" id="err-admission">&#8627; Please enter your admission number.</p>
+      </div>
+
+      <div class="fg">
+        <label class="lbl" for="name"><span class="num">2.</span> Full Name <span class="req">*</span></label>
+        <input type="text" id="name" name="entry.1141935053" class="fi" placeholder="Enter your full name" autocomplete="name"/>
+        <div class="fi-line"></div>
+        <p class="emsg" id="err-name">&#8627; Please enter your full name.</p>
+      </div>
+
+      <div class="fg">
+        <label class="lbl" for="class"><span class="num">3.</span> Class <span class="req">*</span></label>
+        <select id="class" name="entry.2105409516" class="fi">
+          <option value="" disabled selected>&#8212; Select Class &#8212;</option>
+          <option value="1">Class 1</option><option value="2">Class 2</option>
+          <option value="3">Class 3</option><option value="4">Class 4</option>
+          <option value="5">Class 5</option><option value="6">Class 6</option>
+          <option value="7">Class 7</option><option value="8">Class 8</option>
+          <option value="9">Class 9</option><option value="10">Class 10</option>
+        </select>
+        <div class="fi-line"></div>
+        <p class="emsg" id="err-class">&#8627; Please select your class.</p>
+      </div>
+
+      <div class="fg">
+        <label class="lbl" for="usage"><span class="num">4.</span> Usage Time <span class="req">*</span></label>
+        <input type="number" id="usage" name="entry.757812599" class="fi" placeholder="e.g. 30" min="1" max="600"/>
+        <div class="fi-line"></div>
+        <p class="fnote">&#8224;&ensp;Enter duration in minutes only.</p>
+        <p class="emsg" id="err-usage">&#8627; Please enter a valid usage time in minutes.</p>
+      </div>
+
+      <div class="btn-area">
+        <button type="submit" id="submit-btn" class="bsub">
+          <span id="btn-text">Submit Registration</span>
+          <span id="btn-loader" style="display:none;"><span class="spin"></span>&ensp;Filing&hellip;</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- SUCCESS STATE -->
+  <div class="succ" id="success-state">
+    <div class="ok-stamp">FILED</div>
+    <div class="succ-msg">
+      Your session has been duly recorded.<br>
+      <em>Thank you for registering your device usage.</em>
+    </div>
+    <button class="bagain" onclick="resetForm()">&#8617;&ensp;Register another session</button>
+  </div>
+
+  <div class="foot">Secured &bull; Powered by Google Forms</div>
+</div>
+
+<script>
+function validate(){
+  var ok=true;
+  [{id:'admission',e:'err-admission',fn:function(v){return v.trim()!=='';}},
+   {id:'name',e:'err-name',fn:function(v){return v.trim().length>1;}},
+   {id:'class',e:'err-class',fn:function(v){return v!=='';}},
+   {id:'usage',e:'err-usage',fn:function(v){return v.trim()!==''&&Number(v)>0;}}
+  ].forEach(function(f){
+    var el=document.getElementById(f.id),er=document.getElementById(f.e);
+    if(!f.fn(el.value)){el.classList.add('err');er.classList.add('show');ok=false;}
+    else{el.classList.remove('err');er.classList.remove('show');}
+  });
+  return ok;
+}
+['admission','name','class','usage'].forEach(function(id){
+  document.getElementById(id).addEventListener('input',function(){
+    this.classList.remove('err');
+    document.getElementById('err-'+id).classList.remove('show');
+  });
+});
+function handleSubmit(e){
+  if(!validate()){e.preventDefault();return;}
+  document.getElementById('btn-text').style.display='none';
+  document.getElementById('btn-loader').style.display='inline';
+  document.getElementById('submit-btn').disabled=true;
+  setTimeout(showSuccess,1800);
+}
+function showSuccess(){
+  document.getElementById('form-state').style.display='none';
+  document.getElementById('success-state').style.display='block';
+}
+function resetForm(){
+  var f=document.getElementById('google-form');
+  if(f)f.reset();
+  document.getElementById('submit-btn').disabled=false;
+  document.getElementById('btn-text').style.display='inline';
+  document.getElementById('btn-loader').style.display='none';
+  ['admission','name','class','usage'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.classList.remove('err');
+    var er=document.getElementById('err-'+id);if(er)er.classList.remove('show');
+  });
+  document.getElementById('success-state').style.display='none';
+  document.getElementById('form-state').style.display='block';
+}
+</script>
+</body>
+</html>

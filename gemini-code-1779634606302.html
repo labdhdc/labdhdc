@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Terminal // Device Usage Registration</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { mono: ['Fira Code', 'monospace'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { font-family: 'Fira Code', 'Courier New', monospace; }
+
+    body {
+      background-color: #0a0e14;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Subtle CRT Scanline overlay effect */
+    body::before {
+      content: " ";
+      display: block;
+      position: fixed;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      z-index: 99;
+      background-size: 100% 4px, 6px 100%;
+      pointer-events: none;
+    }
+
+    /* Terminal Window Border & Box Shadow */
+    .terminal-card {
+      background: #0d1117;
+      border: 1px solid #2f363d;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Terminal Inputs */
+    .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #00ff66;
+      background: #161b22;
+      transition: all 0.2s ease-in-out;
+      outline: none;
+    }
+    .form-input::placeholder { color: #484f58; }
+    .form-input:hover { border-color: #58a6ff; }
+    .form-input:focus {
+      border-color: #00ff66;
+      background: #0d1117;
+      box-shadow: 0 0 0 2px rgba(0, 255, 102, 0.15);
+    }
+
+    /* Input Labels */
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #c9d1d9;
+      margin-bottom: 6px;
+    }
+    .form-label span.req { color: #ff7b72; margin-left: 2px; }
+
+    /* Terminal Action Button */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      color: #00ff66;
+      font-weight: 700;
+      font-size: 14px;
+      border: 1px solid #00ff66;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .btn-submit:hover:not(:disabled) {
+      background: rgba(0, 255, 102, 0.1);
+      box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+    }
+    .btn-submit:active:not(:disabled) { background: rgba(0, 255, 102, 0.2); }
+    .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; border-color: #484f58; color: #484f58; }
+
+    /* Custom Dropdown Styling for Terminal */
+    select.form-input {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2300ff66' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 42px;
+    }
+    select.form-input option {
+      background: #0d1117;
+      color: #00ff66;
+    }
+
+    /* Dynamic Terminal Prompt Text Blinking Animation */
+    .cursor-blink {
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink {
+      from, to { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Terminal Loading Spinner */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(0, 255, 102, 0.2);
+      border-top-color: #00ff66;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Success / Error overrides */
+    .success-card { display: none; }
+    .form-input.error { border-color: #f25555; background: rgba(242, 85, 85, 0.05); }
+    .error-msg { color: #f25555; font-size: 12px; margin-top: 5px; display: none; }
+    .error-msg.show { display: block; }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen px-4 py-10">
+
+  <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+
+  <div class="w-full max-w-md relative">
+
+    <div class="terminal-card rounded-lg overflow-hidden">
+
+      <div class="bg-[#161b22] px-4 py-3 border-b border-[#2f363d] flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-3 height-3 w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+          <div class="w-3 height-3 w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+          <div class="w-3 height-3 w-3 h-3 rounded-full bg-[#27c93f]"></div>
+        </div>
+        <div class="text-xs text-[#8b949e] font-medium selection:bg-transparent">bash - device_register.sh</div>
+        <div class="w-10"></div>
+      </div>
+
+      <div class="p-6 md:p-8">
+
+        <div id="form-state">
+          
+          <div class="mb-6 font-mono">
+            <div class="text-[#8b949e] text-xs mb-1">LOGGED IN AS: ANONYMOUS_NODE</div>
+            <div class="text-white text-lg font-bold flex items-center gap-1">
+              <span>$ ./start_registration</span><span class="w-2 h-5 bg-[#00ff66] cursor-blink inline-block"></span>
+            </div>
+            <p class="text-xs text-[#8b949e] mt-1 border-b border-dashed border-[#30363d] pb-3">
+              Ready to securely stream system runtime hours logs to remote server...
+            </p>
+          </div>
+
+          <form id="google-form" action="https://docs.google.com/forms/d/e/1FAIpQLScPlJSl-hlGHnHCNSruBIXLRw8kQKHT45ECl3FF3zwYVBHR7A/formResponse" method="POST" target="hidden_iframe" onsubmit="handleSubmit(event)" novalidate>
+
+            <div class="mb-5">
+              <label class="form-label" for="admission">SYS_UID (Admission No.) <span class="req">*</span></label>
+              <input type="text" id="admission" name="entry.788313910" class="form-input" placeholder="e.g. ADM2024001" autocomplete="off"/>
+              <p class="error-msg" id="err-admission">[-] Error: Missing unique identity verification parameter.</p>
+            </div>
+
+            <div class="mb-5">
+              <label class="form-label" for="name">OPERATOR_NAME (Full Name) <span class="req">*</span></label>
+              <input type="text" id="name" name="entry.1141935053" class="form-input" placeholder="Enter full signature string" autocomplete="name"/>
+              <p class="error-msg" id="err-name">[-] Error: Valid operator identity signature required.</p>
+            </div>
+
+            <div class="mb-5">
+              <label class="form-label" for="class">NODE_CLASS (Class Branch) <span class="req">*</span></label>
+              <select id="class" name="entry.2105409516" class="form-input">
+                <option value="" disabled selected>Querying class paths...</option>
+                <option value="1">Class 1</option>
+                <option value="2">Class 2</option>
+                <option value="3">Class 3</option>
+                <option value="4">Class 4</option>
+                <option value="5">Class 5</option>
+                <option value="6">Class 6</option>
+                <option value="7">Class 7</option>
+                <option value="8">Class 8</option>
+                <option value="9">Class 9</option>
+                <option value="10">Class 10</option>
+              </select>
+              <p class="error-msg" id="err-class">[-] Error: Target Node destination route unset.</p>
+            </div>
+
+            <div class="mb-6">
+              <label class="form-label" for="usage">UPTIME_METRIC (Usage Minutes) <span class="req">*</span></label>
+              <input type="number" id="usage" name="entry.757812599" class="form-input" placeholder="e.g. 30" min="1" max="600"/>
+              <p class="text-[11px] text-[#8b949e] mt-1.5 flex items-center gap-1.5">
+                <span>[i]</span> Integer metrics mapped inside absolute range [1-600] minutes.
+              </p>
+              <p class="error-msg" id="err-usage">[-] Error: Bad dynamic window value. Integer bounds constraint failed.</p>
+            </div>
+
+            <div>
+              <button type="submit" id="submit-btn" class="btn-submit">
+                <span id="btn-text">Execute Broadcast</span>
+                <span id="btn-loader" style="display:none;" class="inline-flex items-center gap-2 justify-center">
+                  <span class="spinner"></span> Syncing data packets...
+                </span>
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="success-card text-center py-6 font-mono" id="success-state">
+          <div class="text-[#00ff66] text-4xl mb-3">✓</div>
+          <h2 class="text-lg font-bold text-white uppercase tracking-wider mb-2">[ TRANSACTION COMPLETE ]</h2>
+          <p class="text-[#8b949e] text-xs mb-1">Remote Database Response: 200 OK</p>
+          <p class="text-[#00ff66] text-xs mb-8">Data frame streams successfully pipe-routed into system registers.</p>
+          
+          <button class="px-5 py-2.5 border border-[#30363d] text-xs text-[#c9d1d9] hover:text-[#00ff66] hover:border-[#00ff66] transition-all rounded-md bg-transparent" onclick="resetForm()">
+            &lt;&lt; Initialize New Pipeline
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <p class="text-center text-[10px] uppercase text-[#484f58] tracking-widest mt-5 font-mono">
+      Secured Terminal Frame // Verified Link with Google Engine
+    </p>
+  </div>
+
+  <script>
+    function validate() {
+      let valid = true;
+      const fields = [
+        { id: 'admission', errId: 'err-admission', check: v => v.trim() !== '' },
+        { id: 'name',      errId: 'err-name',      check: v => v.trim().length > 1 },
+        { id: 'class',     errId: 'err-class',     check: v => v !== '' },
+        { id: 'usage',     errId: 'err-usage',     check: v => v.trim() !== '' && Number(v) > 0 },
+      ];
+
+      fields.forEach(({ id, errId, check }) => {
+        const el = document.getElementById(id);
+        const err = document.getElementById(errId);
+        if (!check(el.value)) {
+          el.classList.add('error');
+          err.classList.add('show');
+          valid = false;
+        } else {
+          el.classList.remove('error');
+          err.classList.remove('show');
+        }
+      });
+
+      return valid;
+    }
+
+    // Clear operational error flags on user text insertion
+    ['admission','name','class','usage'].forEach(id => {
+      document.getElementById(id).addEventListener('input', function() {
+        this.classList.remove('error');
+        document.getElementById('err-' + id).classList.remove('show');
+      });
+    });
+
+    function handleSubmit(e) {
+      if (!validate()) {
+        e.preventDefault();
+        return;
+      }
+
+      const btn = document.getElementById('submit-btn');
+      const btnText = document.getElementById('btn-text');
+      const btnLoader = document.getElementById('btn-loader');
+
+      btn.disabled = true;
+      btnText.style.display = 'none';
+      btnLoader.style.display = 'inline-flex';
+
+      // Simulation of connection response timing delay
+      setTimeout(showSuccess, 1800);
+    }
+
+    function showSuccess() {
+      document.getElementById('form-state').style.display = 'none';
+      const successEl = document.getElementById('success-state');
+      successEl.style.display = 'block';
+    }
+
+    function resetForm() {
+      document.getElementById('google-form').reset();
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = false;
+      document.getElementById('btn-text').style.display = 'inline';
+      document.getElementById('btn-loader').style.display = 'none';
+
+      // Clear layout validation variables
+      ['admission','name','class','usage'].forEach(id => {
+        document.getElementById(id).classList.remove('error');
+        document.getElementById('err-' + id).classList.remove('show');
+      });
+
+      document.getElementById('success-state').style.display = 'none';
+      document.getElementById('form-state').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
