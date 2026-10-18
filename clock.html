@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Until 1 November</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gloock&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e4efe3; --ink:#1c3326; --soft:#4f6b5a; --line:#b7cfbc; --track:rgba(28,51,38,.1); --disc:rgba(255,255,255,.5);
+  --ch:#2e8b6a; --cm:#c93c7a; --cs:#ef7d2d;
+  --paper:#fbf9f1; --paper-ink:#1c3326; --paper-soft:#86948b; --paper-line:#e3e0d2; --pen:#d9412f;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1f17; --ink:#e6f2e8; --soft:#9db9a6; --line:#2a4234; --track:rgba(230,242,232,.12); --disc:rgba(255,255,255,.04);
+    --ch:#4fd1a0; --cm:#ff6fa8; --cs:#ffa24d;
+    --paper:#ece8da; --paper-line:#d5d0bd; --paper-soft:#7b857d;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1f17; --ink:#e6f2e8; --soft:#9db9a6; --line:#2a4234; --track:rgba(230,242,232,.12); --disc:rgba(255,255,255,.04);
+  --ch:#4fd1a0; --cm:#ff6fa8; --cs:#ffa24d;
+  --paper:#ece8da; --paper-line:#d5d0bd; --paper-soft:#7b857d;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%; margin:0}
+html{background:var(--bg); scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  background:var(--bg); color:var(--ink); overflow:hidden;
+  font-family:Manrope,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+.stage {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  padding: clamp(32px, 2.5vw, 100px)
+           clamp(48px, 4vw, 154px);
+
+  display: grid;
+  gap: clamp(24px, 1.5vw, 58px);
+
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+
+  grid-template-areas:
+    "to to"
+    "dial cal"
+    "legend cal"
+    "now now";
+
+  overflow: hidden;
+}
+.to{grid-area:to; margin:0; font-size:clamp(1.05rem,2.8vmin,1.6rem); font-weight:700}
+
+/* ring dial */
+.dial{grid-area:dial; container-type:size; min-height:0; display:grid; place-items:center}
+.ring{position:relative; width:min(100cqw,100cqh); height:min(100cqw,100cqh)}
+.ring svg{position:absolute; inset:0; width:100%; height:100%}
+.track{fill:none; stroke:var(--track); stroke-width:12}
+.arc{fill:none; stroke-width:12; stroke-linecap:round; transform:rotate(-90deg); transform-origin:200px 200px}
+.disc{fill:var(--disc)}
+.center{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center}
+.days{font-family:Gloock,Georgia,"Times New Roman",serif; font-size:min(48cqw,48cqh); line-height:.9; letter-spacing:-.02em}
+.dl{font-size:min(6cqw,6cqh); font-weight:800; margin-top:.15em}
+
+.legend{grid-area:legend; list-style:none; margin:0; padding:0; display:flex; justify-content:space-around; gap:1rem}
+.legend li{display:flex; flex-direction:column; align-items:center}
+.legend b{font-size:clamp(1.7rem,min(8vw,5vh),3.2rem); font-weight:800; line-height:1; font-variant-numeric:tabular-nums}
+.cap{display:flex; align-items:center; gap:.4rem; margin-top:.2rem; color:var(--soft); font-size:clamp(.9rem,2vmin,1.15rem); font-weight:500}
+.cap i{width:.7rem; height:.7rem; border-radius:50%; background:var(--c)}
+
+/* wall calendar */
+.cal{
+  grid-area:cal; --cell:clamp(1.6rem,4.6vh,3rem);
+  background:var(--paper); color:var(--paper-ink); position:relative;
+  border-radius:.4rem; padding:1.5rem clamp(.75rem,2.5vw,1.5rem) .8rem; transform:rotate(1.2deg);
+  box-shadow:0 1.2rem 2rem -1rem rgba(0,0,0,.5), 0 .1rem .25rem rgba(0,0,0,.2);
+  width:100%; max-width:30rem; justify-self:center; align-self:center;
+}
+.cal::before,.cal::after{
+  content:""; position:absolute; top:.5rem; width:.7rem; height:.7rem; border-radius:50%;
+  background:var(--bg); box-shadow:inset 0 .1rem .15rem rgba(0,0,0,.45);
+}
+.cal::before{left:28%} .cal::after{right:28%}
+.cal h2{margin:0 0 .35rem; font-family:Gloock,Georgia,serif; font-weight:400; font-size:clamp(1.2rem,3vmin,1.6rem); text-align:center}
+.wds,.grid{display:grid; grid-template-columns:repeat(7,1fr)}
+.wd{text-align:center; font-size:.8rem; font-weight:700; color:var(--paper-soft); padding-bottom:.2rem}
+.grid{grid-auto-rows:var(--cell)}
+.d{
+  position:relative; display:grid; place-items:center; border-top:1px solid var(--paper-line);
+  font-size:clamp(.85rem,calc(var(--cell)*.42),1.3rem); font-weight:700;
+}
+.d.past{color:var(--paper-soft); font-weight:500}
+.d.past::after{
+  content:""; position:absolute; inset:16% 20%; transform:rotate(var(--r,0deg)); opacity:.9;
+  background:
+    linear-gradient(to top right,transparent calc(50% - 1.2px),var(--pen) calc(50% - 1.2px) calc(50% + 1.2px),transparent calc(50% + 1.2px)),
+    linear-gradient(to bottom right,transparent calc(50% - 1.2px),var(--pen) calc(50% - 1.2px) calc(50% + 1.2px),transparent calc(50% + 1.2px));
+}
+.d.today::after{
+  content:""; position:absolute; inset:5% 10%; border:2.5px solid var(--pen);
+  border-radius:52% 48% 55% 45% / 47% 56% 44% 53%; transform:rotate(-7deg);
+}
+.d.target span{
+  background:var(--pen); color:#fff; width:86%; height:92%; display:grid; place-items:center;
+  border-radius:48% 52% 46% 54% / 52% 46% 54% 48%; font-size:.68em; line-height:1; text-align:center;
+}
+
+.now{
+  grid-area:now; border-top:2px solid var(--line); padding-top:clamp(.4rem,1.5vmin,1rem);
+  display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:0 2rem;
+}
+.date{font-size:clamp(1.35rem,3.6vmin,2.1rem); font-weight:800; line-height:1.15}
+.time{font-size:clamp(1.9rem,6vmin,3.4rem); font-weight:700; line-height:1.1; font-variant-numeric:tabular-nums}
+.tz{width:100%; color:var(--soft); font-size:clamp(.85rem,1.9vmin,1.05rem); font-weight:500}
+
+@media (min-aspect-ratio:7/5){
+  .stage{
+    grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); grid-template-rows:auto minmax(0,1fr) auto auto;
+    grid-template-areas:"to to" "dial cal" "legend cal" "now now"; column-gap:clamp(1.5rem,5vw,4rem);
+  }
+  .cal{--cell:clamp(2rem,6vh,3.5rem); padding-top:1.9rem}
+  .legend b{font-size:clamp(2rem,min(3.4vw,7vh),3.5rem)}
+}
+@media (max-height:700px){
+  .cal h2,.wds{display:none}
+  .cal{padding-top:1.2rem}
+}
+
+/* =========================================
+   4K DISPLAY OPTIMIZATION — 3840 × 2160
+   ========================================= */
+
+@media (min-width: 3000px) and (min-height: 1600px) {
+
+  .stage {
+    padding: 65px 150px 55px;
+    gap: 24px 100px;
+
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+
+    grid-template-areas:
+      "to to"
+      "dial cal"
+      "legend cal"
+      "now now";
+  }
+
+  /* Top heading */
+  .to {
+    font-size: 76px;
+    letter-spacing: -2px;
+  }
+
+  /* Much larger countdown ring */
+  .dial {
+    min-width: 0;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .ring {
+    width: min(100%, 1450px);
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  .track,
+  .arc {
+    stroke-width: 8;
+  }
+
+  /* Remaining days in the centre */
+  .days {
+    font-size: min(54cqw, 54cqh);
+    line-height: 0.95;
+  }
+
+  .dl {
+    font-size: min(5.5cqw, 5.5cqh);
+    margin-top: 24px;
+  }
+
+  /* Hours, minutes and seconds */
+  .legend {
+    gap: 75px;
+    justify-content: space-around;
+    align-items: start;
+    padding: 20px 0 25px;
+  }
+
+  .legend li {
+    min-width: 0;
+  }
+
+  .legend b {
+    font-size: 145px;
+    line-height: 1;
+    letter-spacing: -4px;
+  }
+
+  .cap {
+    font-size: 38px;
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .cap i {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+
+  /* Bigger wall calendar */
+  .cal {
+    --cell: 158px;
+
+    width: 100%;
+    max-width: 1300px;
+    padding: 100px 75px 65px;
+
+    border-radius: 12px;
+    transform: rotate(0.6deg);
+  }
+
+  .cal::before,
+  .cal::after {
+    width: 20px;
+    height: 20px;
+    top: 32px;
+  }
+
+  .cal h2 {
+    font-size: 78px;
+    margin-bottom: 30px;
+  }
+
+  .wds {
+    display: grid;
+  }
+
+  .wd {
+    font-size: 34px;
+    padding-bottom: 16px;
+  }
+
+  .grid {
+    grid-auto-rows: var(--cell);
+  }
+
+  .d {
+    font-size: 54px;
+    border-top-width: 2px;
+  }
+
+  .d.past::after {
+    background:
+      linear-gradient(to top right,
+        transparent calc(50% - 2px),
+        var(--pen) calc(50% - 2px) calc(50% + 2px),
+        transparent calc(50% + 2px)),
+      linear-gradient(to bottom right,
+        transparent calc(50% - 2px),
+        var(--pen) calc(50% - 2px) calc(50% + 2px),
+        transparent calc(50% + 2px));
+  }
+
+  .d.today::after {
+    border-width: 4px;
+  }
+
+  .d.target span {
+    font-size: 0.78em;
+  }
+
+  /* Current date and time */
+  .now {
+    padding-top: 35px;
+    gap: 25px 80px;
+    border-top-width: 3px;
+    align-items: baseline;
+  }
+
+  .date {
+    font-size: 68px;
+    line-height: 1.2;
+  }
+
+  .time {
+    font-size: 108px;
+    line-height: 1.1;
+    letter-spacing: -2px;
+  }
+
+  .tz {
+    font-size: 32px;
+  }
+}
+
+/* Extra-wide 4K landscape displays */
+@media (min-width: 3000px) and (min-height: 1600px)
+       and (min-aspect-ratio: 16/9) {
+
+  .stage {
+    column-gap: 130px;
+  }
+
+  .ring {
+    max-width: 1450px;
+  }
+
+  .cal {
+    justify-self: center;
+    align-self: center;
+  }
+}
+
+</style>
+</head>
+<body>
+<main class="stage">
+
+  <section class="dial" aria-label="Time remaining">
+    <div class="ring">
+      <svg viewBox="0 0 400 400" aria-hidden="true">
+        <circle class="disc" cx="200" cy="200" r="132"/>
+        <circle class="track" cx="200" cy="200" r="186"/>
+        <circle class="track" cx="200" cy="200" r="164"/>
+        <circle class="track" cx="200" cy="200" r="142"/>
+        <circle class="arc" id="aS" cx="200" cy="200" r="186" stroke="var(--cs)"/>
+        <circle class="arc" id="aM" cx="200" cy="200" r="164" stroke="var(--cm)"/>
+        <circle class="arc" id="aH" cx="200" cy="200" r="142" stroke="var(--ch)"/>
+      </svg>
+      <div class="center">
+        <div class="days" id="days">0</div>
+        <div class="dl" id="dl">days to go</div>
+      </div>
+    </div>
+  </section>
+
+  <ul class="legend">
+    <li><b id="h">00</b><span class="cap" style="--c:var(--ch)"><i></i><span id="hl">hours</span></span></li>
+    <li><b id="m">00</b><span class="cap" style="--c:var(--cm)"><i></i><span id="ml">minutes</span></span></li>
+    <li><b id="s">00</b><span class="cap" style="--c:var(--cs)"><i></i><span id="sl">seconds</span></span></li>
+  </ul>
+
+  <section class="cal" aria-label="October 2026 calendar">
+    <h2>October 2026</h2>
+    <div class="wds" id="wds"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <footer class="now">
+    <div class="date" id="date"></div>
+    <div class="time" id="time"></div>
+    <div class="tz" id="tz"></div>
+  </footer>
+</main>
+
+<script>
+(function(){
+  var target = new Date("2026-10-31T18:30:00.000Z"); // midnight at the start of 1 November, local time
+  var $ = function(id){ return document.getElementById(id); };
+  var pad = function(n){ return String(n).padStart(2, "0"); };
+  var pl = function(n, a, b){ return n === 1 ? a : b; };
+  var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  try { $("tz").textContent = "Time zone: " + Intl.DateTimeFormat().resolvedOptions().timeZone.replace("_", " "); } catch(e) {}
+
+  var rings = [{el:$("aS"), r:186}, {el:$("aM"), r:164}, {el:$("aH"), r:142}];
+  rings.forEach(function(o){ o.c = 2 * Math.PI * o.r; o.el.style.strokeDasharray = o.c; });
+  function setRing(o, f){ o.el.style.strokeDashoffset = o.c * (1 - f); }
+
+  $("wds").innerHTML = "MTWTFSS".split("").map(function(w){ return '<div class="wd">' + w + '</div>'; }).join("");
+
+  var builtFor = "";
+  function buildCal(now){
+    var key = now.toDateString();
+    if (key === builtFor) return;
+    builtFor = key;
+    var html = "", offset = (new Date(2026, 9, 1).getDay() + 6) % 7; // weeks start on Monday
+    for (var i = 0; i < offset; i++) html += "<div></div>";
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    for (var d = 1; d <= 31; d++){
+      var date = new Date(2026, 9, d), cls = "d";
+      if (date < today) cls += " past"; else if (+date === +today) cls += " today";
+      html += '<div class="' + cls + '" style="--r:' + (((d * 37) % 17) - 8) + 'deg">' + d + '</div>'; // fixed wobble so crosses look hand drawn
+    }
+    html += '<div class="d target"><span>1<br>Nov</span></div>';
+    $("grid").innerHTML = html;
+  }
+
+  var last = {};
+  function put(id, v){ if (last[id] !== v){ last[id] = v; $(id).textContent = v; } }
+
+  function frame(){
+    var now = new Date(), diff = target - now;
+    put("date", now.toLocaleDateString("en-GB", {weekday:"long", day:"numeric", month:"long", year:"numeric"}));
+    put("time", now.toLocaleTimeString("en-IN", {
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: true
+}));    buildCal(now);
+
+    if (diff <= 0){
+      put("days", "0"); put("dl", "It’s here");
+      put("h", "00"); put("m", "00"); put("s", "00");
+      rings.forEach(function(o){ setRing(o, 0); });
+      document.title = "It’s 1 November";
+      return;
+    }
+    var q = reduce ? diff - diff % 1000 : diff; // smooth sweep unless motion is reduced
+    setRing(rings[0], (q % 6e4) / 6e4);
+    setRing(rings[1], (q % 36e5) / 36e5);
+    setRing(rings[2], (q % 864e5) / 864e5);
+
+    var d = Math.floor(diff / 864e5), h = Math.floor(diff % 864e5 / 36e5),
+        m = Math.floor(diff % 36e5 / 6e4), s = Math.floor(diff % 6e4 / 1e3);
+    put("days", String(d)); put("dl", pl(d, "day", "days") + " to go");
+    put("h", pad(h)); put("m", pad(m)); put("s", pad(s));
+    put("hl", pl(h, "hour", "hours")); put("ml", pl(m, "minute", "minutes")); put("sl", pl(s, "second", "seconds"));
+    var t = d + " " + pl(d, "day", "days") + " to go";
+    if (document.title !== t) document.title = t;
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+</script>
+</body>
+</html>
