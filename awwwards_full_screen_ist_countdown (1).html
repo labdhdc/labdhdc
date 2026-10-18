@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>COUNTDOWN TO 01 NOV 2026</title>
+    <style>
+        /* ==========================================================================
+           1. CORE & RESET (STRICT NO-SCROLL LAYOUT)
+           ========================================================================== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            /* Color System */
+            --bg-base: #050507;
+            --bg-surface: rgba(255, 255, 255, 0.03);
+            --text-main: #F4F4F6;
+            --text-muted: rgba(244, 244, 246, 0.45);
+            --text-dim: rgba(244, 244, 246, 0.2);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            
+            /* Dynamic Accent Color (Default Electric Orange) */
+            --accent: #FF5500;
+            --accent-glow: rgba(255, 85, 0, 0.25);
+            --accent-subtle: rgba(255, 85, 0, 0.12);
+
+            /* Typography Stacks */
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+            /* Safe Area Insets for TV / Edge Display */
+            --safe-pad: clamp(1.25rem, 3vw, 3rem);
+        }
+
+        /* Color Themes */
+        [data-theme="electric-orange"] { --accent: #FF5500; --accent-glow: rgba(255, 85, 0, 0.3); --accent-subtle: rgba(255, 85, 0, 0.12); }
+        [data-theme="acid-green"] { --accent: #CCFF00; --accent-glow: rgba(204, 255, 0, 0.3); --accent-subtle: rgba(204, 255, 0, 0.12); }
+        [data-theme="electric-cyan"] { --accent: #00E5FF; --accent-glow: rgba(0, 229, 255, 0.3); --accent-subtle: rgba(0, 229, 255, 0.12); }
+        [data-theme="crimson-red"] { --accent: #FF0055; --accent-glow: rgba(255, 0, 85, 0.3); --accent-subtle: rgba(255, 0, 85, 0.12); }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            line-height: 1;
+            letter-spacing: -0.02em;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        /* ==========================================================================
+           2. ATMOSPHERIC BACKGROUND EFFECTS
+           ========================================================================== */
+        .ambient-canvas {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .ambient-glow {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: clamp(350px, 60vw, 900px);
+            height: clamp(350px, 60vw, 900px);
+            background: radial-gradient(circle, var(--accent-glow) 0%, rgba(5, 5, 7, 0) 70%);
+            opacity: 0.85;
+            transition: background 0.8s ease;
+            filter: blur(40px);
+            will-change: transform;
+        }
+
+        /* Film Grain Simulation via CSS Shader Grid */
+        .grain-overlay {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 0);
+            background-size: 24px 24px;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        /* Ambient Lines */
+        .grid-lines {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, var(--border-subtle) 1px, transparent 1px),
+                        linear-gradient(to bottom, var(--border-subtle) 1px, transparent 1px);
+            background-size: clamp(60px, 8vw, 140px) clamp(60px, 8vw, 140px);
+            opacity: 0.18;
+            mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+        }
+
+        /* ==========================================================================
+           3. MAIN LAYOUT CONTAINER
+           ========================================================================== */
+        .app-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: var(--safe-pad);
+        }
+
+        /* Header Bar */
+        .editorial-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            gap: 1rem;
+        }
+
+        .brand-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .editorial-tag {
+            font-family: var(--font-mono);
+            font-size: clamp(0.75rem, 1.1vw, 1.05rem);
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            color: var(--accent);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.4s ease;
+        }
+
+        .editorial-tag::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .editorial-subtitle {
+            font-size: clamp(0.85rem, 1.2vw, 1.15rem);
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-weight: 400;
+        }
+
+        /* Significantly enlarged live clock section */
+        .clock-live {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 0.6rem 1.25rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-subtle);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .live-time-digits {
+            font-family: var(--font-mono);
+            font-size: clamp(1.4rem, 2.5vw, 2.6rem);
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: 0.06em;
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .live-date-str {
+            font-size: clamp(0.75rem, 1.1vw, 1.1rem);
+            color: var(--accent);
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* Target Date Badge Header */
+        .target-badge {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            padding: 0.6rem 1.25rem;
+            border-radius: 100px;
+            font-family: var(--font-mono);
+            font-size: clamp(0.75rem, 1.1vw, 1rem);
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .target-badge strong {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        /* ==========================================================================
+           4. HERO COUNTDOWN SECTION (REMAINING DAYS ARTWORK)
+           ========================================================================== */
+        .countdown-artboard {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin: 0.2rem 0;
+        }
+
+        /* Big Hero Days Display */
+        .days-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .days-label {
+            font-family: var(--font-mono);
+            font-size: clamp(0.75rem, 1.2vw, 1.1rem);
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: clamp(0.1rem, 0.6vh, 0.4rem);
+        }
+
+        .days-display {
+            font-size: clamp(6.5rem, 21vw, 18rem);
+            font-weight: 900;
+            line-height: 0.82;
+            letter-spacing: -0.05em;
+            color: var(--text-main);
+            position: relative;
+            font-variant-numeric: tabular-nums;
+            /* Editorial Gradients & Outline */
+            background: linear-gradient(180deg, #FFFFFF 30%, rgba(255, 255, 255, 0.55) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 15px 35px rgba(0,0,0,0.8));
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform;
+        }
+
+        .days-unit {
+            font-size: clamp(0.85rem, 1.6vw, 1.4rem);
+            font-weight: 700;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-top: clamp(0.2rem, 0.8vh, 0.6rem);
+            transition: color 0.4s ease;
+        }
+
+        /* Noticeably Enlarged Secondary Timer (Hours / Minutes / Seconds) */
+        .time-secondary-grid {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(1.5rem, 4vw, 4.5rem);
+            margin-top: clamp(1rem, 2.2vh, 2rem);
+            padding: clamp(0.6rem, 1.2vh, 1.2rem) clamp(1.8rem, 4vw, 3.5rem);
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .time-node {
+            display: flex;
+            align-items: baseline;
+            gap: clamp(0.4rem, 0.8vw, 0.75rem);
+        }
+
+        .time-num {
+            font-family: var(--font-mono);
+            font-size: clamp(2rem, 4.8vw, 4.5rem);
+            font-weight: 800;
+            color: var(--text-main);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        .time-sub {
+            font-size: clamp(0.75rem, 1.2vw, 1.15rem);
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .time-sep {
+            font-family: var(--font-mono);
+            font-size: clamp(1.8rem, 4vw, 3.8rem);
+            color: var(--accent);
+            opacity: 0.6;
+            animation: pulse-sep 2s infinite ease-in-out;
+            line-height: 1;
+        }
+
+        @keyframes pulse-sep {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Visual Circular Timeline Progress Line */
+        .timeline-progress-bar {
+            position: absolute;
+            bottom: 0;
+            width: clamp(200px, 40vw, 500px);
+            height: 2px;
+            background: var(--border-subtle);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .timeline-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+            transition: width 0.5s ease-out, background 0.4s ease;
+        }
+
+        /* ==========================================================================
+           5. FOOTER & TV REMOTE ACCESSIBLE CONTROLS
+           ========================================================================== */
+        .editorial-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 1rem;
+            z-index: 10;
+        }
+
+        .footer-details {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .footer-tag {
+            font-family: var(--font-mono);
+            font-size: clamp(0.65rem, 0.85vw, 0.8rem);
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        /* Control Panel */
+        .controls-group {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: rgba(10, 10, 14, 0.7);
+            padding: 0.35rem 0.5rem;
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .ctrl-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: clamp(0.65rem, 0.8vw, 0.8rem);
+            padding: 0.4rem 0.8rem;
+            border-radius: 100px;
+            cursor: pointer;
+            outline: none;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Google TV / Remote Keyboard High Contrast Focus Rings */
+        .ctrl-btn:hover,
+        .ctrl-btn:focus-visible {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent);
+            box-shadow: 0 0 12px var(--accent-subtle);
+            transform: translateY(-1px);
+        }
+
+        .ctrl-btn:active {
+            transform: translateY(1px);
+        }
+
+        .ctrl-btn.active {
+            color: var(--text-main);
+            background: var(--bg-surface);
+            border-color: var(--border-subtle);
+        }
+
+        .theme-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent);
+            box-shadow: 0 0 6px var(--accent);
+            display: inline-block;
+        }
+
+        /* ==========================================================================
+           6. PRESENTATION & AMBIENT TV MODE
+           ========================================================================== */
+        body.presentation-mode .editorial-footer,
+        body.presentation-mode .target-badge,
+        body.presentation-mode .timeline-progress-bar {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        body.presentation-mode .editorial-header {
+            opacity: 0.4;
+            transition: opacity 0.5s ease;
+        }
+
+        .ambient-hint {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            z-index: 100;
+        }
+
+        body.presentation-mode .ambient-hint {
+            opacity: 0.6;
+        }
+
+        /* ==========================================================================
+           7. TARGET ARRIVED / COMPLETION STATE
+           ========================================================================== */
+        .completion-overlay {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 1.5rem;
+            animation: fadeIn 1s ease forward;
+        }
+
+        .completion-title {
+            font-size: clamp(2.5rem, 8vw, 7rem);
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            background: linear-gradient(180deg, #FFFFFF, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            line-height: 1;
+        }
+
+        .completion-sub {
+            font-family: var(--font-mono);
+            font-size: clamp(0.9rem, 1.8vw, 1.5rem);
+            color: var(--text-muted);
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+        }
+
+        /* ==========================================================================
+           8. ACCESSIBILITY & PREFERS REDUCED MOTION
+           ========================================================================== */
+        @media (prefers-reduced-motion: reduce) {
+            *, ::before, ::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            .ambient-glow, .time-sep {
+                animation: none !important;
+            }
+        }
+
+        /* Extra Responsive Adjustments for Ultra-Short TV / Landscape Heights */
+        @media (max-height: 550px) {
+            .app-container { padding: 0.5rem 1.25rem; }
+            .days-display { font-size: clamp(4.5rem, 24vh, 9rem); }
+            .time-secondary-grid { margin-top: 0.4rem; padding: 0.3rem 1rem; }
+            .time-num { font-size: clamp(1.4rem, 8vh, 2.5rem); }
+            .time-sep { font-size: clamp(1.2rem, 7vh, 2.2rem); }
+            .live-time-digits { font-size: clamp(1.1rem, 5vh, 1.8rem); }
+            .clock-live { padding: 0.3rem 0.8rem; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body data-theme="electric-orange">
+
+    <!-- Atmospheric Visual Layers -->
+    <div class="ambient-canvas" aria-hidden="true">
+        <div class="ambient-glow" id="ambientGlow"></div>
+        <div class="grid-lines"></div>
+        <div class="grain-overlay"></div>
+    </div>
+
+    <!-- Main Container (Guaranteed No Scroll) -->
+    <main class="app-container" role="main">
+
+        <!-- Top Editorial Header Bar -->
+        <header class="editorial-header">
+            <div class="brand-meta">
+                <span class="editorial-tag">Time Is Moving</span>
+                <span class="editorial-subtitle">01 November 2026</span>
+            </div>
+
+            
+
+            <div class="clock-live" aria-live="off">
+                <div class="live-time-digits" id="liveTimeDisplay">00:00:00 IST</div>
+                <div class="live-date-str" id="liveDateDisplay">LOADING DATE...</div>
+            </div>
+        </header>
+
+        <!-- Main Focal Countdown Artwork -->
+        <section class="countdown-artboard" id="countdownArtboard" aria-label="Countdown Display">
+            <div class="days-wrapper" id="liveCountdownBlock">
+                <span class="days-label">Days Remaining</span>
+                <div class="days-display" id="daysDisplay">000</div>
+                <span class="days-unit">DAYS TO GO</span>
+
+                <!-- Secondary Time Node Bar -->
+                <div class="time-secondary-grid" aria-label="Hours, Minutes, and Seconds">
+                    <div class="time-node">
+                        <span class="time-num" id="hoursDisplay">00</span>
+                        <span class="time-sub">HRS</span>
+                    </div>
+                    <span class="time-sep">:</span>
+                    <div class="time-node">
+                        <span class="time-num" id="minsDisplay">00</span>
+                        <span class="time-sub">MIN</span>
+                    </div>
+                    <span class="time-sep">:</span>
+                    <div class="time-node">
+                        <span class="time-num" id="secsDisplay">00</span>
+                        <span class="time-sub">SEC</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completion State Screen (Initially Hidden) -->
+            <div class="completion-overlay" id="completionOverlay">
+                <h1 class="completion-title">THE DAY HAS ARRIVED!</h1>
+                <p class="completion-sub">01 NOVEMBER 2026 · IST TARGET REACHED</p>
+            </div>
+
+            <!-- Subtle Timeline Progress Line -->
+            <div class="timeline-progress-bar" id="progressBarContainer" title="Timeline Progress to Target">
+                <div class="timeline-progress-fill" id="progressFill"></div>
+            </div>
+        </section>
+
+        <!-- Bottom Footer with Remote Nav Controls -->
+        <footer class="editorial-footer">
+            <div class="footer-details">
+                <span class="footer-tag">Asia/Kolkata (UTC+05:30)</span>
+                <span class="footer-tag" style="opacity: 0.4;">·</span>
+                <span class="footer-tag">Counting Every Second</span>
+            </div>
+
+            <!-- TV Remote Focusable Controls -->
+            <nav class="controls-group" aria-label="Display Controls">
+                <button class="ctrl-btn" id="themeBtn" title="Switch Theme Accent" tabindex="0">
+                    <span class="theme-dot" id="themeDot"></span>
+                    <span id="themeLabel">Accent</span>
+                </button>
+                <button class="ctrl-btn" id="clockFormatBtn" title="Toggle 12h/24h Clock" tabindex="0">
+                    <span id="clockFormatLabel">24H</span>
+                </button>
+                <button class="ctrl-btn" id="audioPulseBtn" title="Toggle Audio Second Pulse" tabindex="0">
+                    <span id="audioLabel">MUTE</span>
+                </button>
+                <button class="ctrl-btn" id="ambientBtn" title="Toggle Presentation / Ambient Mode" tabindex="0">
+                    <span>AMBIENT</span>
+                </button>
+                <button class="ctrl-btn" id="fullscreenBtn" title="Toggle Fullscreen Mode" tabindex="0">
+                    <span>FULLSCREEN</span>
+                </button>
+            </nav>
+        </footer>
+
+    </main>
+
+    <!-- Hint displayed during Presentation Mode -->
+    <div class="ambient-hint">Press Escape, OK, or Tap Screen to Show Controls</div>
+
+    <script>
+        /**
+         * Awwwards-Inspired Full-Screen IST Countdown Engine
+         * Target: 1 November 2026 00:00:00 IST (UTC+05:30)
+         * Equivalent ISO UTC Target: 2026-10-31T18:30:00Z
+         */
+        (function() {
+            "use strict";
+
+            // TARGET TIMESTAMP: Nov 1, 2026 00:00:00 IST = Oct 31, 2026 18:30:00 UTC
+            const TARGET_TIMESTAMP = Date.UTC(2026, 9, 31, 18, 30, 0, 0); // Month is 0-indexed (9 = Oct)
+            
+            // Reference Start Point for timeline percentage (e.g. Oct 18, 2026)
+            const START_TIMESTAMP = Date.UTC(2024, 0, 1, 0, 0, 0, 0); 
+
+            // Configuration State
+            const THEMES = ['electric-orange', 'acid-green', 'electric-cyan', 'crimson-red'];
+            let currentThemeIndex = 0;
+            let use24HourClock = true;
+            let audioPulseEnabled = false;
+            let presentationMode = false;
+            
+            // Web Audio API Audio Context for subtle second pulse
+            let audioCtx = null;
+
+            // DOM Elements
+            const daysDisplay = document.getElementById('daysDisplay');
+            const hoursDisplay = document.getElementById('hoursDisplay');
+            const minsDisplay = document.getElementById('minsDisplay');
+            const secsDisplay = document.getElementById('secsDisplay');
+            const liveTimeDisplay = document.getElementById('liveTimeDisplay');
+            const liveDateDisplay = document.getElementById('liveDateDisplay');
+            const progressFill = document.getElementById('progressFill');
+            const liveCountdownBlock = document.getElementById('liveCountdownBlock');
+            const completionOverlay = document.getElementById('completionOverlay');
+            const progressBarContainer = document.getElementById('progressBarContainer');
+
+            // Controls & Buttons
+            const themeBtn = document.getElementById('themeBtn');
+            const clockFormatBtn = document.getElementById('clockFormatBtn');
+            const clockFormatLabel = document.getElementById('clockFormatLabel');
+            const audioPulseBtn = document.getElementById('audioPulseBtn');
+            const audioLabel = document.getElementById('audioLabel');
+            const ambientBtn = document.getElementById('ambientBtn');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+            /* ==========================================================================
+               1. INITIALIZATION & PREFERENCES (LOCALSTORAGE)
+               ========================================================================== */
+            function initPreferences() {
+                try {
+                    const savedTheme = localStorage.getItem('countdown_theme');
+                    if (savedTheme && THEMES.includes(savedTheme)) {
+                        currentThemeIndex = THEMES.indexOf(savedTheme);
+                        applyTheme(THEMES[currentThemeIndex]);
+                    }
+                    const savedClock = localStorage.getItem('countdown_clock24');
+                    if (savedClock !== null) {
+                        use24HourClock = savedClock === 'true';
+                        clockFormatLabel.textContent = use24HourClock ? '24H' : '12H';
+                    }
+                } catch (e) {
+                    // Safe fallback for restricted iframe or storage disabled
+                    console.log('LocalStorage unavailable, defaulting to initial state.');
+                }
+            }
+
+            function applyTheme(themeName) {
+                document.body.setAttribute('data-theme', themeName);
+                try {
+                    localStorage.setItem('countdown_theme', themeName);
+                } catch(e) {}
+            }
+
+            function cycleTheme() {
+                currentThemeIndex = (currentThemeIndex + 1) % THEMES.length;
+                applyTheme(THEMES[currentThemeIndex]);
+            }
+
+            /* ==========================================================================
+               2. CORE ACCURATE COUNTDOWN CALCULATOR
+               ========================================================================== */
+            function updateCountdown() {
+                const now = Date.now();
+                const diff = TARGET_TIMESTAMP - now;
+
+                if (diff <= 0) {
+                    // Target Reached! Show Completion
+                    liveCountdownBlock.style.display = 'none';
+                    progressBarContainer.style.display = 'none';
+                    completionOverlay.style.display = 'flex';
+                    document.title = "THE DAY HAS ARRIVED! · 01 NOV 2026";
+                    return;
+                }
+
+                // Math calculations for remaining time
+                const secondsTotal = Math.floor(diff / 1000);
+                const days = Math.floor(secondsTotal / (3600 * 24));
+                const hours = Math.floor((secondsTotal % (3600 * 24)) / 3600);
+                const minutes = Math.floor((secondsTotal % 3600) / 60);
+                const seconds = secondsTotal % 60;
+
+                // Format with leading zeros
+                const daysStr = String(days).padStart(3, '0');
+                const hoursStr = String(hours).padStart(2, '0');
+                const minsStr = String(minutes).padStart(2, '0');
+                const secsStr = String(seconds).padStart(2, '0');
+
+                // DOM Updates
+                if (daysDisplay.textContent !== daysStr) daysDisplay.textContent = daysStr;
+                if (hoursDisplay.textContent !== hoursStr) hoursDisplay.textContent = hoursStr;
+                if (minsDisplay.textContent !== minsStr) minsDisplay.textContent = minsStr;
+                
+                // Animate Seconds slightly
+                if (secsDisplay.textContent !== secsStr) {
+                    secsDisplay.textContent = secsStr;
+                    triggerAudioPulse();
+                }
+
+                // Update Browser Tab Title Dynamically
+                document.title = `[${days} DAYS] COUNTDOWN TO 01 NOV 2026`;
+
+                // Timeline Progress %
+                const totalSpan = TARGET_TIMESTAMP - START_TIMESTAMP;
+                const elapsed = now - START_TIMESTAMP;
+                const pct = Math.min(Math.max((elapsed / totalSpan) * 100, 0), 100);
+                progressFill.style.width = pct.toFixed(2) + '%';
+
+                // Update Current Live Kolkata Clock
+                updateLiveClock(now);
+            }
+
+            /* ==========================================================================
+               3. LIVE ASIA/KOLKATA TIME DISPLAY
+               ========================================================================== */
+            function updateLiveClock(nowTimestamp) {
+                const nowObj = new Date(nowTimestamp);
+
+                // Format IST Time
+                const timeOptions = {
+                    timeZone: 'Asia/Kolkata',
+                    hour12: !use24HourClock,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                };
+                
+                try {
+                    const timeFormatter = new Intl.DateTimeFormat('en-US', timeOptions);
+                    liveTimeDisplay.textContent = timeFormatter.format(nowObj) + ' IST';
+
+                    // Format IST Date: e.g. SUNDAY · 18 OCTOBER 2026
+                    const dateOptions = {
+                        timeZone: 'Asia/Kolkata',
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                    };
+                    const dateFormatter = new Intl.DateTimeFormat('en-US', dateOptions);
+                    const parts = dateFormatter.formatToParts(nowObj);
+                    
+                    let weekday = '', day = '', month = '', year = '';
+                    for (const p of parts) {
+                        if (p.type === 'weekday') weekday = p.value.toUpperCase();
+                        if (p.type === 'day') day = p.value;
+                        if (p.type === 'month') month = p.value.toUpperCase();
+                        if (p.type === 'year') year = p.value;
+                    }
+                    liveDateDisplay.textContent = `${weekday} · ${day} ${month} ${year}`;
+                } catch(e) {
+                    // Fallback formatting if Intl timezone fails
+                    liveTimeDisplay.textContent = nowObj.toUTCString().slice(17, 25) + ' UTC';
+                }
+            }
+
+            /* ==========================================================================
+               4. WEB AUDIO API SYNTH PULSE (OPTIONAL AUDIO)
+               ========================================================================== */
+            function initAudio() {
+                if (!audioCtx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) audioCtx = new AudioContext();
+                }
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            }
+
+            function triggerAudioPulse() {
+                if (!audioPulseEnabled || !audioCtx) return;
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, audioCtx.currentTime); // High subtle tick
+                    gain.gain.setValueAtTime(0.015, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.04);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.05);
+                } catch(e) {}
+            }
+
+            /* ==========================================================================
+               5. FULLSCREEN & PRESENTATION MODE TOGGLES
+               ========================================================================== */
+            function toggleFullscreen() {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    const docEl = document.documentElement;
+                    if (docEl.requestFullscreen) {
+                        docEl.requestFullscreen().catch(() => {});
+                    } else if (docEl.webkitRequestFullscreen) {
+                        docEl.webkitRequestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen().catch(() => {});
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    }
+                }
+            }
+
+            function toggleAmbientMode() {
+                presentationMode = !presentationMode;
+                if (presentationMode) {
+                    document.body.classList.add('presentation-mode');
+                    ambientBtn.classList.add('active');
+                } else {
+                    document.body.classList.remove('presentation-mode');
+                    ambientBtn.classList.remove('active');
+                }
+            }
+
+            /* ==========================================================================
+               6. EVENT LISTENERS & REMOTE CONTROL BINDINGS
+               ========================================================================== */
+            function setupEvents() {
+                // Theme Switcher
+                themeBtn.addEventListener('click', () => {
+                    initAudio();
+                    cycleTheme();
+                });
+
+                // Clock Format Toggle
+                clockFormatBtn.addEventListener('click', () => {
+                    initAudio();
+                    use24HourClock = !use24HourClock;
+                    clockFormatLabel.textContent = use24HourClock ? '24H' : '12H';
+                    try {
+                        localStorage.setItem('countdown_clock24', use24HourClock);
+                    } catch(e) {}
+                    updateCountdown();
+                });
+
+                // Audio Pulse Toggle
+                audioPulseBtn.addEventListener('click', () => {
+                    initAudio();
+                    audioPulseEnabled = !audioPulseEnabled;
+                    audioLabel.textContent = audioPulseEnabled ? 'PULSE ON' : 'MUTE';
+                    audioPulseBtn.classList.toggle('active', audioPulseEnabled);
+                });
+
+                // Ambient Mode
+                ambientBtn.addEventListener('click', () => {
+                    initAudio();
+                    toggleAmbientMode();
+                });
+
+                // Fullscreen
+                fullscreenBtn.addEventListener('click', () => {
+                    initAudio();
+                    toggleFullscreen();
+                });
+
+                // Keyboard & Google TV Remote D-Pad Navigation
+                document.addEventListener('keydown', (e) => {
+                    // Reveal controls if ambient mode active and user presses key
+                    if (presentationMode && (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ')) {
+                        toggleAmbientMode();
+                        return;
+                    }
+
+                    switch(e.key) {
+                        case 'f':
+                        case 'F':
+                            toggleFullscreen();
+                            break;
+                        case 't':
+                        case 'T':
+                            cycleTheme();
+                            break;
+                        case 'a':
+                        case 'A':
+                            toggleAmbientMode();
+                            break;
+                    }
+                });
+
+                // Exit Presentation Mode on Touch or Click in empty space
+                document.addEventListener('click', (e) => {
+                    if (presentationMode && !e.target.closest('.controls-group')) {
+                        toggleAmbientMode();
+                    }
+                });
+
+                // Smooth Parallax Light Effect following mouse on desktop
+                window.addEventListener('mousemove', (e) => {
+                    const x = (e.clientX / window.innerWidth - 0.5) * 40;
+                    const y = (e.clientY / window.innerHeight - 0.5) * 40;
+                    const ambientGlow = document.getElementById('ambientGlow');
+                    if (ambientGlow) {
+                        ambientGlow.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+                    }
+                });
+
+                // Page Visibility Resume Handler
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) {
+                        updateCountdown();
+                    }
+                });
+            }
+
+            /* ==========================================================================
+               7. STRICT NO-SCROLL & OVERFLOW DETECTOR CHECK
+               ========================================================================== */
+            function runNoScrollGuard() {
+                const docEl = document.documentElement;
+                const bodyEl = document.body;
+
+                const hasVerticalOverflow = docEl.scrollHeight > docEl.clientHeight || bodyEl.scrollHeight > bodyEl.clientHeight;
+                const hasHorizontalOverflow = docEl.scrollWidth > docEl.clientWidth || bodyEl.scrollWidth > bodyEl.clientWidth;
+
+                if (hasVerticalOverflow || hasHorizontalOverflow) {
+                    console.warn('[Layout Guard] Warning: Viewport overflow detected! Check layout parameters.', {
+                        scrollHeight: docEl.scrollHeight,
+                        clientHeight: docEl.clientHeight,
+                        scrollWidth: docEl.scrollWidth,
+                        clientWidth: docEl.clientWidth
+                    });
+                } else {
+                    console.log('[Layout Guard] Verified: Perfect zero-scroll viewport fit.');
+                }
+            }
+
+            /* ==========================================================================
+               8. BOOTSTRAP SYSTEM
+               ========================================================================== */
+            window.addEventListener('DOMContentLoaded', () => {
+                initPreferences();
+                setupEvents();
+                updateCountdown();
+                
+                // Precision 1000ms loop
+                setInterval(updateCountdown, 1000);
+
+                // Run Layout Check
+                setTimeout(runNoScrollGuard, 500);
+            });
+
+            // Re-check layout fit on screen resize
+            window.addEventListener('resize', runNoScrollGuard);
+
+        })();
+    </script>
+</body>
+</html>
