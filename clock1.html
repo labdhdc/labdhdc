@@ -11,6 +11,7 @@
 :root{
   --bg:#e6f5f3; --ink:#06302d; --soft-ink:#3d6b67; --lite:#f6fffd; --soft-lite:#ddf8f4;
   --w1:#0a7d74; --w2:#064340;
+  --ease:cubic-bezier(.2,.8,.2,1);
   box-sizing:border-box;
   color-scheme:light;
 }
@@ -67,43 +68,73 @@ body{
   position:absolute; inset:0; z-index:1;
   padding:calc(clamp(1rem,3.5vmin,6rem) + env(safe-area-inset-top,0px)) clamp(1.25rem,5vmin,8rem) calc(clamp(1rem,3.5vmin,6rem) + env(safe-area-inset-bottom,0px));
   display:grid; gap:clamp(.5rem,2vmin,3rem);
-  grid-template-rows:auto minmax(0,1fr) auto auto; grid-template-areas:"to" "days" "hms" "now";
+  grid-template-rows:auto minmax(0,1fr); grid-template-areas:"to" "main";
 }
 .scene.ink{color:var(--ink); --soft:var(--soft-ink)}
 .scene.lite{color:var(--lite); --soft:var(--soft-lite); inset:auto; left:0; bottom:0; width:100cqw; height:100cqh}
 
 .to{grid-area:to; margin:0; font-size:clamp(1.15rem,3vmin,1.7rem); font-weight:700}
-.dsec{grid-area:days; display:flex; flex-direction:column; justify-content:center; min-height:0}
-.days{font-size:min(66vw,32vh); font-weight:900; line-height:.8; letter-spacing:-.05em; margin-left:-.04em}
-.dl{margin:.25em 0 0; font-size:clamp(1.5rem,4.6vmin,2.8rem); font-weight:800; line-height:1}
 
-.hms{grid-area:hms; display:flex; justify-content:space-between; gap:1rem}
+/* two views share one spot and swap every 5 seconds */
+.main{grid-area:main; position:relative; display:grid; min-height:0; min-width:0}
+.view{
+  grid-area:1/1; min-height:0; min-width:0; padding-bottom:clamp(.6rem,1.6vmin,2rem);
+  opacity:0; visibility:hidden; transform:translateY(3vh) scale(.97); filter:blur(10px);
+  transition:opacity .8s ease, transform .9s var(--ease), filter .8s ease, visibility 0s linear .9s;
+}
+.view.on{opacity:1; visibility:visible; transform:none; filter:none; transition:opacity .8s ease, transform .9s var(--ease), filter .8s ease, visibility 0s}
+.cycle{position:absolute; left:0; right:0; bottom:0; height:max(.15rem,.4vh); background:rgba(128,128,128,.28); border-radius:9rem; overflow:hidden}
+.cycle i{display:block; height:100%; background:currentColor; transform-origin:left; transform:scaleX(0)}
+.cycle.go i{animation:fill 5s linear forwards}
+@keyframes fill{to{transform:scaleX(1)}}
+@keyframes enter{from{opacity:0; transform:translateY(3vh)} to{opacity:1; transform:none}}
+@keyframes pop{from{opacity:0; transform:scale(.85)} to{opacity:1; transform:none}}
+
+/* view 1: days and the time left today */
+.count{display:grid; grid-template-rows:minmax(0,1fr) auto; gap:clamp(.5rem,2vmin,3rem)}
+.dsec{display:flex; flex-direction:column; justify-content:center; min-height:0}
+.days{font-size:min(70vw,38vh); font-weight:900; line-height:.8; letter-spacing:-.05em; margin-left:-.04em; transform-origin:left center}
+.dl{margin:.25em 0 0; font-size:clamp(1.5rem,4.6vmin,2.8rem); font-weight:800; line-height:1}
+.hms{display:flex; justify-content:space-between; gap:1rem}
 .u{display:flex; flex-direction:column}
 .u b{font-size:clamp(1.9rem,min(10vw,6vh),4rem); font-weight:800; line-height:1; font-variant-numeric:tabular-nums}
 .cap{margin-top:.2rem; color:var(--soft); font-size:clamp(.95rem,2.1vmin,1.2rem); font-weight:500}
+.on .days{animation:pop 1s var(--ease) .1s both}
+.on .dl{animation:enter .9s var(--ease) .3s both}
+.on .u{animation:enter .9s var(--ease) both; animation-delay:calc(.35s + var(--i) * .1s)}
 
-.now{grid-area:now; display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:0 2rem}
-.date{font-size:clamp(1.4rem,3.8vmin,2.2rem); font-weight:800; line-height:1.15}
-.time{font-size:clamp(2rem,6.5vmin,3.6rem); font-weight:800; line-height:1.1; font-variant-numeric:tabular-nums}
-.tz{width:100%; color:var(--soft); font-size:clamp(.85rem,1.9vmin,1.05rem); font-weight:500}
+/* view 2: the clock, with the time as large as it can be */
+.clock{display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; gap:clamp(.5rem,2.2vh,3rem)}
+.time{display:flex; align-items:flex-end; justify-content:center; gap:.08em; font-size:min(21vw,16vh); font-variant-numeric:tabular-nums}
+.hm{font-weight:900; line-height:.85; letter-spacing:-.04em}
+.rest{display:flex; flex-direction:column; align-items:flex-start; line-height:1; padding-bottom:.04em}
+.ss{font-size:.42em; font-weight:800; opacity:.75}
+.ap{font-size:.28em; font-weight:800; color:var(--soft); margin-top:.15em}
+.date{font-size:clamp(1.3rem,6.2vw,2.4rem); font-weight:800; line-height:1.1; text-wrap:balance}
+.tz{color:var(--soft); font-size:clamp(.85rem,1.9vmin,1.05rem); font-weight:500}
+.on .time{animation:enter 1s var(--ease) .1s both}
+.on .date{animation:enter 1s var(--ease) .3s both}
+.on .tz{animation:enter 1s var(--ease) .45s both}
 
+@media (min-width:1921px) and (min-height:1081px){ html{font-size:max(100%, min(.8333vw, 1.4815vh))} }
 @media (min-aspect-ratio:7/5){
-  .scene{
-    grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); grid-template-rows:auto minmax(0,1fr) auto;
-    grid-template-areas:"to to" "days hms" "now now"; column-gap:clamp(1.5rem,5vw,8rem);
-  }
   .to{font-size:clamp(1.15rem,3.4vh,6rem)}
-  .days{font-size:min(58vh,33vw)}
+  .count{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); grid-template-rows:minmax(0,1fr); column-gap:clamp(1.5rem,5vw,8rem)}
+  .days{font-size:min(66vh,33vw)}
   .dl{font-size:clamp(1.5rem,5.2vh,8rem)}
   .hms{flex-direction:column; justify-content:center; gap:clamp(.4rem,2.4vh,3rem)}
   .u{flex-direction:row; align-items:baseline; gap:clamp(1rem,2vw,3rem)}
-  .u b{font-size:clamp(2.2rem,min(14vh,7vw),14rem); min-width:2.1ch}
+  .u b{font-size:clamp(2.2rem,min(18vh,8.5vw),16rem); min-width:2.1ch}
   .cap{margin-top:0; font-size:clamp(1rem,3vh,4rem)}
-  .date{font-size:clamp(1.4rem,5.2vh,8rem)}
-  .time{font-size:clamp(2rem,9.5vh,14rem)}
-  .tz{font-size:clamp(.85rem,2.2vh,3rem)}
+  .time{font-size:min(30vh,19vw)}
+  .date{font-size:min(8vh,4vw)}
+  .tz{font-size:clamp(.85rem,2.4vh,3rem)}
 }
-@media (prefers-reduced-motion: reduce){ .water,.bub{animation:none} .bub{display:none} }
+@media (prefers-reduced-motion: reduce){
+  .water,.bub{animation:none} .bub{display:none}
+  .view,.view.on{transition:none}
+  .on .days,.on .dl,.on .u,.on .time,.on .date,.on .tz,.cycle.go i{animation:none}
+}
 </style>
 </head>
 <body>
@@ -123,18 +154,26 @@ body{
 
   var scene =
     '<p class="to">Until 1 November 2026</p>' +
-    '<section class="dsec"><div class="days" data-k="days">0</div><p class="dl" data-k="dl">days to go</p></section>' +
-    '<section class="hms">' +
-      '<div class="u"><b data-k="h">00</b><span class="cap" data-k="hl">hours</span></div>' +
-      '<div class="u"><b data-k="m">00</b><span class="cap" data-k="ml">minutes</span></div>' +
-      '<div class="u"><b data-k="s">00</b><span class="cap" data-k="sl">seconds</span></div>' +
-    '</section>' +
-    '<footer class="now"><div class="date" data-k="date"></div><div class="time" data-k="time"></div><div class="tz" data-k="tz"></div></footer>';
+    '<section class="main">' +
+      '<div class="view count on">' +
+        '<div class="dsec"><div class="days" data-k="days">0</div><p class="dl" data-k="dl">days to go</p></div>' +
+        '<div class="hms">' +
+          '<div class="u" style="--i:0"><b data-k="h">00</b><span class="cap" data-k="hl">hours</span></div>' +
+          '<div class="u" style="--i:1"><b data-k="m">00</b><span class="cap" data-k="ml">minutes</span></div>' +
+          '<div class="u" style="--i:2"><b data-k="s">00</b><span class="cap" data-k="sl">seconds</span></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="view clock" aria-hidden="true">' +
+        '<div class="time"><span class="hm" data-k="hm">0:00</span><span class="rest"><span class="ss" data-k="ss">:00</span><span class="ap" data-k="ap">am</span></span></div>' +
+        '<div class="date" data-k="date"></div><div class="tz" data-k="tz"></div>' +
+      '</div>' +
+      '<div class="cycle" aria-hidden="true"><i></i></div>' +
+    '</section>';
   $("base").innerHTML = scene;
   $("lite").innerHTML = scene;
 
   var tank = $("tank"), els = {}, last = {};
-  ["days","dl","h","m","s","hl","ml","sl","date","time","tz"].forEach(function(k){ els[k] = tank.querySelectorAll('[data-k="' + k + '"]'); });
+  ["days","dl","h","m","s","hl","ml","sl","hm","ss","ap","date","tz"].forEach(function(k){ els[k] = tank.querySelectorAll('[data-k="' + k + '"]'); });
   function put(k, v){
     if (last[k] === v) return;
     last[k] = v;
@@ -153,10 +192,12 @@ body{
     }
   }
 
+  var fmt = new Intl.DateTimeFormat("en-GB", {hour:"numeric", minute:"2-digit", second:"2-digit", hour12:true});
   function tick(){
     var now = new Date(), diff = target - now;
+    var p = {}; fmt.formatToParts(now).forEach(function(x){ p[x.type] = x.value; });
+    put("hm", p.hour + ":" + p.minute); put("ss", ":" + p.second); put("ap", p.dayPeriod || "");
     put("date", now.toLocaleDateString("en-GB", {weekday:"long", day:"numeric", month:"long", year:"numeric"}));
-    put("time", now.toLocaleTimeString("en-GB", {hour:"numeric", minute:"2-digit", second:"2-digit", hour12:true}));
 
     var f = diff <= 0 ? 1 : Math.max(0, Math.min(1, 1 - diff / (target - start)));
     tank.style.setProperty("--lvl", (f * 100).toFixed(3) + "%");
@@ -177,6 +218,20 @@ body{
     setTimeout(tick, 1000 - (Date.now() % 1000));
   }
   tick();
+
+  // swap between the countdown and the clock every 5 seconds; both drawn copies switch together
+  var counts = tank.querySelectorAll(".view.count"), clocks = tank.querySelectorAll(".view.clock"),
+      bars = tank.querySelectorAll(".cycle"), showing = "count";
+  function each(list, fn){ for (var i = 0; i < list.length; i++) fn(list[i]); }
+  function restartBars(){ each(bars, function(b){ b.classList.remove("go"); }); void tank.offsetWidth; each(bars, function(b){ b.classList.add("go"); }); }
+  function show(which){
+    showing = which;
+    each(counts, function(v){ v.classList.toggle("on", which === "count"); v.setAttribute("aria-hidden", which !== "count"); });
+    each(clocks, function(v){ v.classList.toggle("on", which === "clock"); v.setAttribute("aria-hidden", which !== "clock"); });
+    restartBars();
+  }
+  restartBars();
+  setInterval(function(){ show(showing === "count" ? "clock" : "count"); }, 5000);
 })();
 </script>
 </body>
