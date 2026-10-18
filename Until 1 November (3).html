@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Until 1 November</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e6f5f3; --ink:#06302d; --soft-ink:#3d6b67; --lite:#f6fffd; --soft-lite:#ddf8f4;
+  --w1:#0a7d74; --w2:#064340;
+  box-sizing:border-box;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#06171a; --ink:#cdeeea; --soft-ink:#86b5b0; --lite:#f2fffd; --soft-lite:#c4efe8;
+    --w1:#0b7a71; --w2:#053a37;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#06171a; --ink:#cdeeea; --soft-ink:#86b5b0; --lite:#f2fffd; --soft-lite:#c4efe8;
+  --w1:#0b7a71; --w2:#053a37;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%; margin:0}
+html{background:var(--bg)}
+body{
+  background:var(--bg); overflow:hidden;
+  font-family:Epilogue,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+
+/* the whole screen is a tank; the water level is the share of time that has passed since 11 October */
+.tank{position:fixed; inset:0; container-type:size; overflow:hidden; background:var(--bg); --lvl:0%}
+.water{
+  --wv:max(22vmin,160px); --sh:calc(var(--wv) / 10 - 1px);
+  position:absolute; left:0; right:0; bottom:0; height:var(--lvl); transition:height 1s linear;
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20' preserveAspectRatio='none'%3E%3Cpath d='M0 10Q50 0 100 10T200 10V20H0Z'/%3E%3C/svg%3E"),linear-gradient(#000,#000);
+  -webkit-mask-size:var(--wv) calc(var(--wv) / 10),100% 100%;
+  -webkit-mask-repeat:repeat-x,no-repeat;
+  -webkit-mask-position:0 0,0 var(--sh);
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20' preserveAspectRatio='none'%3E%3Cpath d='M0 10Q50 0 100 10T200 10V20H0Z'/%3E%3C/svg%3E"),linear-gradient(#000,#000);
+  mask-size:var(--wv) calc(var(--wv) / 10),100% 100%;
+  mask-repeat:repeat-x,no-repeat;
+  mask-position:0 0,0 var(--sh);
+  animation:wave 7s linear infinite;
+}
+.water.back{height:calc(var(--lvl) + 2.4vmin); background:rgba(24,170,155,.38); animation-duration:11s; animation-direction:reverse}
+.water.front{background:linear-gradient(var(--w1),var(--w2))}
+@keyframes wave{
+  from{-webkit-mask-position:0 0,0 var(--sh); mask-position:0 0,0 var(--sh)}
+  to{-webkit-mask-position:var(--wv) 0,0 var(--sh); mask-position:var(--wv) 0,0 var(--sh)}
+}
+.bub{
+  position:absolute; bottom:-8%; left:var(--x); width:var(--s); height:var(--s); border-radius:50%;
+  border:.1rem solid rgba(255,255,255,.35); background:rgba(255,255,255,.1);
+  animation:bub var(--dur) linear var(--delay) infinite;
+}
+@keyframes bub{from{bottom:-8%; transform:translateX(0)} to{bottom:105%; transform:translateX(var(--sway))}}
+
+/* the same layout is drawn twice: dark ink above the water, light ink inside it */
+.scene{
+  position:absolute; inset:0; z-index:1;
+  padding:calc(clamp(1rem,3.5vmin,6rem) + env(safe-area-inset-top,0px)) clamp(1.25rem,5vmin,8rem) calc(clamp(1rem,3.5vmin,6rem) + env(safe-area-inset-bottom,0px));
+  display:grid; gap:clamp(.5rem,2vmin,3rem);
+  grid-template-rows:auto minmax(0,1fr) auto auto; grid-template-areas:"to" "days" "hms" "now";
+}
+.scene.ink{color:var(--ink); --soft:var(--soft-ink)}
+.scene.lite{color:var(--lite); --soft:var(--soft-lite); inset:auto; left:0; bottom:0; width:100cqw; height:100cqh}
+
+.to{grid-area:to; margin:0; font-size:clamp(1.15rem,3vmin,1.7rem); font-weight:700}
+.dsec{grid-area:days; display:flex; flex-direction:column; justify-content:center; min-height:0}
+.days{font-size:min(66vw,32vh); font-weight:900; line-height:.8; letter-spacing:-.05em; margin-left:-.04em}
+.dl{margin:.25em 0 0; font-size:clamp(1.5rem,4.6vmin,2.8rem); font-weight:800; line-height:1}
+
+.hms{grid-area:hms; display:flex; justify-content:space-between; gap:1rem}
+.u{display:flex; flex-direction:column}
+.u b{font-size:clamp(1.9rem,min(10vw,6vh),4rem); font-weight:800; line-height:1; font-variant-numeric:tabular-nums}
+.cap{margin-top:.2rem; color:var(--soft); font-size:clamp(.95rem,2.1vmin,1.2rem); font-weight:500}
+
+.now{grid-area:now; display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:0 2rem}
+.date{font-size:clamp(1.4rem,3.8vmin,2.2rem); font-weight:800; line-height:1.15}
+.time{font-size:clamp(2rem,6.5vmin,3.6rem); font-weight:800; line-height:1.1; font-variant-numeric:tabular-nums}
+.tz{width:100%; color:var(--soft); font-size:clamp(.85rem,1.9vmin,1.05rem); font-weight:500}
+
+@media (min-aspect-ratio:7/5){
+  .scene{
+    grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); grid-template-rows:auto minmax(0,1fr) auto;
+    grid-template-areas:"to to" "days hms" "now now"; column-gap:clamp(1.5rem,5vw,8rem);
+  }
+  .to{font-size:clamp(1.15rem,3.4vh,6rem)}
+  .days{font-size:min(58vh,33vw)}
+  .dl{font-size:clamp(1.5rem,5.2vh,8rem)}
+  .hms{flex-direction:column; justify-content:center; gap:clamp(.4rem,2.4vh,3rem)}
+  .u{flex-direction:row; align-items:baseline; gap:clamp(1rem,2vw,3rem)}
+  .u b{font-size:clamp(2.2rem,min(14vh,7vw),14rem); min-width:2.1ch}
+  .cap{margin-top:0; font-size:clamp(1rem,3vh,4rem)}
+  .date{font-size:clamp(1.4rem,5.2vh,8rem)}
+  .time{font-size:clamp(2rem,9.5vh,14rem)}
+  .tz{font-size:clamp(.85rem,2.2vh,3rem)}
+}
+@media (prefers-reduced-motion: reduce){ .water,.bub{animation:none} .bub{display:none} }
+</style>
+</head>
+<body>
+<div class="tank" id="tank">
+  <div class="scene ink" id="base"></div>
+  <div class="water back" aria-hidden="true"></div>
+  <div class="water front" id="front" aria-hidden="true"><div class="scene lite" id="lite"></div></div>
+</div>
+
+<script>
+(function(){
+  var target = new Date(2026, 10, 1, 0, 0, 0); // midnight at the start of 1 November, local time
+  var start = new Date(2026, 9, 11, 0, 0, 0);  // the tank is empty on 11 October and full on 1 November
+  var $ = function(id){ return document.getElementById(id); };
+  var pad = function(n){ return String(n).padStart(2, "0"); };
+  var pl = function(n, a, b){ return n === 1 ? a : b; };
+
+  var scene =
+    '<p class="to">Until 1 November 2026</p>' +
+    '<section class="dsec"><div class="days" data-k="days">0</div><p class="dl" data-k="dl">days to go</p></section>' +
+    '<section class="hms">' +
+      '<div class="u"><b data-k="h">00</b><span class="cap" data-k="hl">hours</span></div>' +
+      '<div class="u"><b data-k="m">00</b><span class="cap" data-k="ml">minutes</span></div>' +
+      '<div class="u"><b data-k="s">00</b><span class="cap" data-k="sl">seconds</span></div>' +
+    '</section>' +
+    '<footer class="now"><div class="date" data-k="date"></div><div class="time" data-k="time"></div><div class="tz" data-k="tz"></div></footer>';
+  $("base").innerHTML = scene;
+  $("lite").innerHTML = scene;
+
+  var tank = $("tank"), els = {}, last = {};
+  ["days","dl","h","m","s","hl","ml","sl","date","time","tz"].forEach(function(k){ els[k] = tank.querySelectorAll('[data-k="' + k + '"]'); });
+  function put(k, v){
+    if (last[k] === v) return;
+    last[k] = v;
+    for (var i = 0; i < els[k].length; i++) els[k][i].textContent = v;
+  }
+  try { put("tz", "Time zone: " + Intl.DateTimeFormat().resolvedOptions().timeZone.replace("_", " ")); } catch(e) {}
+
+  // bubbles rise inside the water only
+  if (!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)){
+    var front = $("front");
+    for (var k = 0; k < 16; k++){
+      var b = document.createElement("i");
+      b.className = "bub";
+      b.style.cssText = "--x:" + (Math.random() * 100).toFixed(1) + "%;--s:" + (1 + Math.random() * 2.4).toFixed(2) + "vmin;--dur:" + (9 + Math.random() * 11).toFixed(1) + "s;--delay:-" + (Math.random() * 18).toFixed(1) + "s;--sway:" + (Math.random() * 6 - 3).toFixed(1) + "vmin";
+      front.insertBefore(b, $("lite"));
+    }
+  }
+
+  function tick(){
+    var now = new Date(), diff = target - now;
+    put("date", now.toLocaleDateString("en-GB", {weekday:"long", day:"numeric", month:"long", year:"numeric"}));
+    put("time", now.toLocaleTimeString("en-GB", {hour:"numeric", minute:"2-digit", second:"2-digit", hour12:true}));
+
+    var f = diff <= 0 ? 1 : Math.max(0, Math.min(1, 1 - diff / (target - start)));
+    tank.style.setProperty("--lvl", (f * 100).toFixed(3) + "%");
+
+    if (diff <= 0){
+      put("days", "0"); put("dl", "It’s here");
+      put("h", "00"); put("m", "00"); put("s", "00");
+      document.title = "It’s 1 November";
+      return;
+    }
+    var d = Math.floor(diff / 864e5), h = Math.floor(diff % 864e5 / 36e5),
+        m = Math.floor(diff % 36e5 / 6e4), s = Math.floor(diff % 6e4 / 1e3);
+    put("days", String(d)); put("dl", pl(d, "day", "days") + " to go");
+    put("h", pad(h)); put("m", pad(m)); put("s", pad(s));
+    put("hl", pl(h, "hour", "hours")); put("ml", pl(m, "minute", "minutes")); put("sl", pl(s, "second", "seconds"));
+    var t = d + " " + pl(d, "day", "days") + " to go";
+    if (document.title !== t) document.title = t;
+    setTimeout(tick, 1000 - (Date.now() % 1000));
+  }
+  tick();
+})();
+</script>
+</body>
+</html>
