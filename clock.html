@@ -10,7 +10,7 @@
 <style>
 :root{
   --bg:#e4efe3; --ink:#1c3326; --soft:#4f6b5a; --line:#b7cfbc; --track:rgba(28,51,38,.1); --disc:rgba(255,255,255,.5);
-  --ch:#2e8b6a; --cm:#c93c7a; --cs:#ef7d2d;
+  --cd:#4b5bd6;
   --paper:#fbf9f1; --paper-ink:#1c3326; --paper-soft:#86948b; --paper-line:#e3e0d2; --pen:#d9412f;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
@@ -20,14 +20,14 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#0f1f17; --ink:#e6f2e8; --soft:#9db9a6; --line:#2a4234; --track:rgba(230,242,232,.12); --disc:rgba(255,255,255,.04);
-    --ch:#4fd1a0; --cm:#ff6fa8; --cs:#ffa24d;
+    --cd:#8da2ff;
     --paper:#ece8da; --paper-line:#d5d0bd; --paper-soft:#7b857d;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0f1f17; --ink:#e6f2e8; --soft:#9db9a6; --line:#2a4234; --track:rgba(230,242,232,.12); --disc:rgba(255,255,255,.04);
-  --ch:#4fd1a0; --cm:#ff6fa8; --cs:#ffa24d;
+  --cd:#8da2ff;
   --paper:#ece8da; --paper-line:#d5d0bd; --paper-soft:#7b857d;
   color-scheme:dark;
 }
@@ -38,45 +38,49 @@ body{
   background:var(--bg); color:var(--ink); overflow:hidden;
   font-family:Manrope,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 }
-.stage {
-  width: 100%;
-  height: 100vh;
-  height: 100dvh;
-  padding: clamp(32px, 2.5vw, 100px)
-           clamp(48px, 4vw, 154px);
-
-  display: grid;
-  gap: clamp(24px, 1.5vw, 58px);
-
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-  grid-template-rows: auto minmax(0, 1fr) auto auto;
-
-  grid-template-areas:
-    "to to"
-    "dial cal"
-    "legend cal"
-    "now now";
-
-  overflow: hidden;
+.stage{
+  height:100%; padding:clamp(1rem,3.5vmin,6rem) clamp(1.25rem,5vmin,8rem);
+  display:grid; gap:clamp(.5rem,1.8vmin,3rem);
+  grid-template-rows:auto minmax(0,1fr) auto auto auto;
+  grid-template-areas:"to" "dial" "legend" "cal" "now";
 }
 .to{grid-area:to; margin:0; font-size:clamp(1.05rem,2.8vmin,1.6rem); font-weight:700}
 
-/* ring dial */
+/* background animation: slow drifting colour glows and small rising specks */
+.stage{position:relative; z-index:1}
+.bg{position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none}
+.bg i{position:absolute; border-radius:50%; will-change:transform}
+.bg .b{
+  width:62vmax; height:62vmax; left:var(--l); top:var(--t); margin:-31vmax 0 0 -31vmax;
+  background:radial-gradient(circle,var(--c) 0,transparent 62%);
+  animation:drift var(--dur) ease-in-out infinite alternate;
+}
+.bg .dot{bottom:-1rem; left:var(--x); width:var(--s); height:var(--s); background:var(--ink); opacity:0; animation:rise var(--dur) linear var(--delay) infinite}
+@keyframes drift{from{transform:translate3d(0,0,0) scale(1)} to{transform:translate3d(var(--dx),var(--dy),0) scale(1.18)}}
+@keyframes rise{
+  0%{transform:translate3d(0,0,0); opacity:0}
+  10%{opacity:.18}
+  90%{opacity:.18}
+  100%{transform:translate3d(var(--sway),-115vh,0); opacity:0}
+}
+@media (prefers-reduced-motion: reduce){ .bg i{animation:none} .bg .dot{display:none} }
+
+/* days ring */
 .dial{grid-area:dial; container-type:size; min-height:0; display:grid; place-items:center}
 .ring{position:relative; width:min(100cqw,100cqh); height:min(100cqw,100cqh)}
 .ring svg{position:absolute; inset:0; width:100%; height:100%}
-.track{fill:none; stroke:var(--track); stroke-width:12}
-.arc{fill:none; stroke-width:12; stroke-linecap:round; transform:rotate(-90deg); transform-origin:200px 200px}
+.track{fill:none; stroke:var(--track); stroke-width:16}
+.arc{fill:none; stroke:var(--cd); stroke-width:16; stroke-linecap:round; transform:rotate(-90deg); transform-origin:200px 200px; transition:stroke-dashoffset 1s linear}
 .disc{fill:var(--disc)}
 .center{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center}
-.days{font-family:Gloock,Georgia,"Times New Roman",serif; font-size:min(48cqw,48cqh); line-height:.9; letter-spacing:-.02em}
-.dl{font-size:min(6cqw,6cqh); font-weight:800; margin-top:.15em}
+.days{font-family:Gloock,Georgia,"Times New Roman",serif; font-size:min(56cqw,56cqh); line-height:.9; letter-spacing:-.02em}
+.dl{display:flex; align-items:center; gap:.4em; font-size:min(7cqw,7cqh); font-weight:800; margin-top:.1em}
+.dl i{width:.6em; height:.6em; border-radius:50%; background:var(--cd)}
 
 .legend{grid-area:legend; list-style:none; margin:0; padding:0; display:flex; justify-content:space-around; gap:1rem}
 .legend li{display:flex; flex-direction:column; align-items:center}
 .legend b{font-size:clamp(1.7rem,min(8vw,5vh),3.2rem); font-weight:800; line-height:1; font-variant-numeric:tabular-nums}
-.cap{display:flex; align-items:center; gap:.4rem; margin-top:.2rem; color:var(--soft); font-size:clamp(.9rem,2vmin,1.15rem); font-weight:500}
-.cap i{width:.7rem; height:.7rem; border-radius:50%; background:var(--c)}
+.cap{margin-top:.2rem; color:var(--soft); font-size:clamp(.9rem,2vmin,1.15rem); font-weight:500}
 
 /* wall calendar */
 .cal{
@@ -96,18 +100,18 @@ body{
 .wd{text-align:center; font-size:.8rem; font-weight:700; color:var(--paper-soft); padding-bottom:.2rem}
 .grid{grid-auto-rows:var(--cell)}
 .d{
-  position:relative; display:grid; place-items:center; border-top:1px solid var(--paper-line);
-  font-size:clamp(.85rem,calc(var(--cell)*.42),1.3rem); font-weight:700;
+  position:relative; display:grid; place-items:center; border-top:.0625rem solid var(--paper-line);
+  font-size:clamp(.85rem,calc(var(--cell)*.42),8rem); font-weight:700;
 }
 .d.past{color:var(--paper-soft); font-weight:500}
 .d.past::after{
   content:""; position:absolute; inset:16% 20%; transform:rotate(var(--r,0deg)); opacity:.9;
   background:
-    linear-gradient(to top right,transparent calc(50% - 1.2px),var(--pen) calc(50% - 1.2px) calc(50% + 1.2px),transparent calc(50% + 1.2px)),
-    linear-gradient(to bottom right,transparent calc(50% - 1.2px),var(--pen) calc(50% - 1.2px) calc(50% + 1.2px),transparent calc(50% + 1.2px));
+    linear-gradient(to top right,transparent calc(50% - .075rem),var(--pen) calc(50% - .075rem) calc(50% + .075rem),transparent calc(50% + .075rem)),
+    linear-gradient(to bottom right,transparent calc(50% - .075rem),var(--pen) calc(50% - .075rem) calc(50% + .075rem),transparent calc(50% + .075rem));
 }
 .d.today::after{
-  content:""; position:absolute; inset:5% 10%; border:2.5px solid var(--pen);
+  content:""; position:absolute; inset:5% 10%; border:.16rem solid var(--pen);
   border-radius:52% 48% 55% 45% / 47% 56% 44% 53%; transform:rotate(-7deg);
 }
 .d.target span{
@@ -116,242 +120,74 @@ body{
 }
 
 .now{
-  grid-area:now; border-top:2px solid var(--line); padding-top:clamp(.4rem,1.5vmin,1rem);
+  grid-area:now; border-top:.125rem solid var(--line); padding-top:clamp(.4rem,1.5vmin,1rem);
   display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:0 2rem;
 }
 .date{font-size:clamp(1.35rem,3.6vmin,2.1rem); font-weight:800; line-height:1.15}
 .time{font-size:clamp(1.9rem,6vmin,3.4rem); font-weight:700; line-height:1.1; font-variant-numeric:tabular-nums}
 .tz{width:100%; color:var(--soft); font-size:clamp(.85rem,1.9vmin,1.05rem); font-weight:500}
 
+/* big screens (4K and up): scale rem-based details so lines and spacing keep their proportions */
+@media (min-width:1921px) and (min-height:1081px){
+  html{font-size:max(100%, min(.8333vw, 1.4815vh))}
+}
+
+/* landscape screens: everything is sized from the screen height so it grows with the display */
 @media (min-aspect-ratio:7/5){
   .stage{
     grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); grid-template-rows:auto minmax(0,1fr) auto auto;
-    grid-template-areas:"to to" "dial cal" "legend cal" "now now"; column-gap:clamp(1.5rem,5vw,4rem);
+    grid-template-areas:"to to" "dial cal" "legend cal" "now now"; column-gap:clamp(1.5rem,5vw,8rem);
   }
-  .cal{--cell:clamp(2rem,6vh,3.5rem); padding-top:1.9rem}
-  .legend b{font-size:clamp(2rem,min(3.4vw,7vh),3.5rem)}
+  .to{font-size:clamp(1.05rem,3.4vh,6rem)}
+  .legend b{font-size:clamp(2rem,8.5vh,12rem)}
+  .cap{font-size:clamp(.95rem,2.6vh,4rem)}
+  .cal{
+    --cell:clamp(2rem,8.2vh,14rem);
+    width:calc(var(--cell) * 7.6); max-width:100%;
+    padding:calc(var(--cell) * .55) calc(var(--cell) * .3) calc(var(--cell) * .3);
+  }
+  .cal::before,.cal::after{top:calc(var(--cell) * .15); width:calc(var(--cell) * .2); height:calc(var(--cell) * .2)}
+  .cal h2{font-size:clamp(1.2rem,3.4vh,5.5rem); margin-bottom:calc(var(--cell) * .1)}
+  .wd{font-size:clamp(.8rem,2vh,3rem)}
+  .date{font-size:clamp(1.4rem,5.2vh,8rem)}
+  .time{font-size:clamp(2rem,9.5vh,14rem)}
+  .tz{font-size:clamp(.85rem,2.2vh,3rem)}
 }
 @media (max-height:700px){
   .cal h2,.wds{display:none}
   .cal{padding-top:1.2rem}
 }
-
-/* =========================================
-   4K DISPLAY OPTIMIZATION — 3840 × 2160
-   ========================================= */
-
-@media (min-width: 3000px) and (min-height: 1600px) {
-
-  .stage {
-    padding: 65px 150px 55px;
-    gap: 24px 100px;
-
-    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-    grid-template-rows: auto minmax(0, 1fr) auto auto;
-
-    grid-template-areas:
-      "to to"
-      "dial cal"
-      "legend cal"
-      "now now";
-  }
-
-  /* Top heading */
-  .to {
-    font-size: 76px;
-    letter-spacing: -2px;
-  }
-
-  /* Much larger countdown ring */
-  .dial {
-    min-width: 0;
-    min-height: 0;
-    overflow: visible;
-  }
-
-  .ring {
-    width: min(100%, 1450px);
-    height: auto;
-    aspect-ratio: 1;
-  }
-
-  .track,
-  .arc {
-    stroke-width: 8;
-  }
-
-  /* Remaining days in the centre */
-  .days {
-    font-size: min(54cqw, 54cqh);
-    line-height: 0.95;
-  }
-
-  .dl {
-    font-size: min(5.5cqw, 5.5cqh);
-    margin-top: 24px;
-  }
-
-  /* Hours, minutes and seconds */
-  .legend {
-    gap: 75px;
-    justify-content: space-around;
-    align-items: start;
-    padding: 20px 0 25px;
-  }
-
-  .legend li {
-    min-width: 0;
-  }
-
-  .legend b {
-    font-size: 145px;
-    line-height: 1;
-    letter-spacing: -4px;
-  }
-
-  .cap {
-    font-size: 38px;
-    gap: 16px;
-    margin-top: 20px;
-  }
-
-  .cap i {
-    width: 22px;
-    height: 22px;
-    flex-shrink: 0;
-  }
-
-  /* Bigger wall calendar */
-  .cal {
-    --cell: 158px;
-
-    width: 100%;
-    max-width: 1300px;
-    padding: 100px 75px 65px;
-
-    border-radius: 12px;
-    transform: rotate(0.6deg);
-  }
-
-  .cal::before,
-  .cal::after {
-    width: 20px;
-    height: 20px;
-    top: 32px;
-  }
-
-  .cal h2 {
-    font-size: 78px;
-    margin-bottom: 30px;
-  }
-
-  .wds {
-    display: grid;
-  }
-
-  .wd {
-    font-size: 34px;
-    padding-bottom: 16px;
-  }
-
-  .grid {
-    grid-auto-rows: var(--cell);
-  }
-
-  .d {
-    font-size: 54px;
-    border-top-width: 2px;
-  }
-
-  .d.past::after {
-    background:
-      linear-gradient(to top right,
-        transparent calc(50% - 2px),
-        var(--pen) calc(50% - 2px) calc(50% + 2px),
-        transparent calc(50% + 2px)),
-      linear-gradient(to bottom right,
-        transparent calc(50% - 2px),
-        var(--pen) calc(50% - 2px) calc(50% + 2px),
-        transparent calc(50% + 2px));
-  }
-
-  .d.today::after {
-    border-width: 4px;
-  }
-
-  .d.target span {
-    font-size: 0.78em;
-  }
-
-  /* Current date and time */
-  .now {
-    padding-top: 35px;
-    gap: 25px 80px;
-    border-top-width: 3px;
-    align-items: baseline;
-  }
-
-  .date {
-    font-size: 68px;
-    line-height: 1.2;
-  }
-
-  .time {
-    font-size: 108px;
-    line-height: 1.1;
-    letter-spacing: -2px;
-  }
-
-  .tz {
-    font-size: 32px;
-  }
-}
-
-/* Extra-wide 4K landscape displays */
-@media (min-width: 3000px) and (min-height: 1600px)
-       and (min-aspect-ratio: 16/9) {
-
-  .stage {
-    column-gap: 130px;
-  }
-
-  .ring {
-    max-width: 1450px;
-  }
-
-  .cal {
-    justify-self: center;
-    align-self: center;
-  }
-}
-
+@media (prefers-reduced-motion: reduce){ .arc{transition:none} }
 </style>
 </head>
 <body>
+<div class="bg" aria-hidden="true">
+  <i class="b" style="--l:15%;--t:25%;--c:rgba(91,110,230,.30);--dx:18vw;--dy:10vh;--dur:26s"></i>
+  <i class="b" style="--l:85%;--t:20%;--c:rgba(46,160,120,.32);--dx:-16vw;--dy:14vh;--dur:32s"></i>
+  <i class="b" style="--l:70%;--t:90%;--c:rgba(220,80,140,.20);--dx:-20vw;--dy:-12vh;--dur:30s"></i>
+  <i class="b" style="--l:10%;--t:95%;--c:rgba(240,140,60,.22);--dx:16vw;--dy:-14vh;--dur:36s"></i>
+</div>
 <main class="stage">
+  <p class="to">Until 1 November 2026</p>
 
-  <section class="dial" aria-label="Time remaining">
+  <section class="dial" aria-label="Days remaining">
     <div class="ring">
       <svg viewBox="0 0 400 400" aria-hidden="true">
-        <circle class="disc" cx="200" cy="200" r="132"/>
-        <circle class="track" cx="200" cy="200" r="186"/>
-        <circle class="track" cx="200" cy="200" r="164"/>
-        <circle class="track" cx="200" cy="200" r="142"/>
-        <circle class="arc" id="aS" cx="200" cy="200" r="186" stroke="var(--cs)"/>
-        <circle class="arc" id="aM" cx="200" cy="200" r="164" stroke="var(--cm)"/>
-        <circle class="arc" id="aH" cx="200" cy="200" r="142" stroke="var(--ch)"/>
+        <circle class="disc" cx="200" cy="200" r="158"/>
+        <circle class="track" cx="200" cy="200" r="176"/>
+        <circle class="arc" id="aD" cx="200" cy="200" r="176"/>
       </svg>
       <div class="center">
         <div class="days" id="days">0</div>
-        <div class="dl" id="dl">days to go</div>
+        <div class="dl"><i></i><span id="dl">days to go</span></div>
       </div>
     </div>
   </section>
 
-  <ul class="legend">
-    <li><b id="h">00</b><span class="cap" style="--c:var(--ch)"><i></i><span id="hl">hours</span></span></li>
-    <li><b id="m">00</b><span class="cap" style="--c:var(--cm)"><i></i><span id="ml">minutes</span></span></li>
-    <li><b id="s">00</b><span class="cap" style="--c:var(--cs)"><i></i><span id="sl">seconds</span></span></li>
+  <ul class="legend" aria-label="Time left in the final day">
+    <li><b id="h">00</b><span class="cap" id="hl">hours</span></li>
+    <li><b id="m">00</b><span class="cap" id="ml">minutes</span></li>
+    <li><b id="s">00</b><span class="cap" id="sl">seconds</span></li>
   </ul>
 
   <section class="cal" aria-label="October 2026 calendar">
@@ -369,16 +205,15 @@ body{
 
 <script>
 (function(){
-  var target = new Date("2026-10-31T18:30:00.000Z"); // midnight at the start of 1 November, local time
+  var target = new Date(2026, 10, 1, 0, 0, 0); // midnight at the start of 1 November, local time
+  var ringStart = new Date(2026, 9, 11, 0, 0, 0); // the days ring counts down from 11 October
   var $ = function(id){ return document.getElementById(id); };
   var pad = function(n){ return String(n).padStart(2, "0"); };
   var pl = function(n, a, b){ return n === 1 ? a : b; };
-  var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   try { $("tz").textContent = "Time zone: " + Intl.DateTimeFormat().resolvedOptions().timeZone.replace("_", " "); } catch(e) {}
 
-  var rings = [{el:$("aS"), r:186}, {el:$("aM"), r:164}, {el:$("aH"), r:142}];
-  rings.forEach(function(o){ o.c = 2 * Math.PI * o.r; o.el.style.strokeDasharray = o.c; });
-  function setRing(o, f){ o.el.style.strokeDashoffset = o.c * (1 - f); }
+  var ring = $("aD"), C = 2 * Math.PI * 176;
+  ring.style.strokeDasharray = C;
 
   $("wds").innerHTML = "MTWTFSS".split("").map(function(w){ return '<div class="wd">' + w + '</div>'; }).join("");
 
@@ -399,41 +234,43 @@ body{
     $("grid").innerHTML = html;
   }
 
-  var last = {};
-  function put(id, v){ if (last[id] !== v){ last[id] = v; $(id).textContent = v; } }
-
-  function frame(){
+  function tick(){
     var now = new Date(), diff = target - now;
-    put("date", now.toLocaleDateString("en-GB", {weekday:"long", day:"numeric", month:"long", year:"numeric"}));
-    put("time", now.toLocaleTimeString("en-IN", {
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-  hour12: true
-}));    buildCal(now);
+    $("date").textContent = now.toLocaleDateString("en-GB", {weekday:"long", day:"numeric", month:"long", year:"numeric"});
+    $("time").textContent = now.toLocaleTimeString("en-GB", {hour:"numeric", minute:"2-digit", second:"2-digit", hour12:true});
+    buildCal(now);
 
     if (diff <= 0){
-      put("days", "0"); put("dl", "It’s here");
-      put("h", "00"); put("m", "00"); put("s", "00");
-      rings.forEach(function(o){ setRing(o, 0); });
+      $("days").textContent = "0"; $("dl").textContent = "It’s here";
+      $("h").textContent = $("m").textContent = $("s").textContent = "00";
+      ring.style.strokeDashoffset = C;
       document.title = "It’s 1 November";
       return;
     }
-    var q = reduce ? diff - diff % 1000 : diff; // smooth sweep unless motion is reduced
-    setRing(rings[0], (q % 6e4) / 6e4);
-    setRing(rings[1], (q % 36e5) / 36e5);
-    setRing(rings[2], (q % 864e5) / 864e5);
+    var frac = Math.min(1, diff / (target - ringStart));
+    ring.style.strokeDashoffset = C * (1 - frac);
 
     var d = Math.floor(diff / 864e5), h = Math.floor(diff % 864e5 / 36e5),
         m = Math.floor(diff % 36e5 / 6e4), s = Math.floor(diff % 6e4 / 1e3);
-    put("days", String(d)); put("dl", pl(d, "day", "days") + " to go");
-    put("h", pad(h)); put("m", pad(m)); put("s", pad(s));
-    put("hl", pl(h, "hour", "hours")); put("ml", pl(m, "minute", "minutes")); put("sl", pl(s, "second", "seconds"));
-    var t = d + " " + pl(d, "day", "days") + " to go";
-    if (document.title !== t) document.title = t;
-    requestAnimationFrame(frame);
+    $("days").textContent = d;
+    $("dl").textContent = pl(d, "day", "days") + " to go";
+    $("h").textContent = pad(h); $("m").textContent = pad(m); $("s").textContent = pad(s);
+    $("hl").textContent = pl(h, "hour", "hours");
+    $("ml").textContent = pl(m, "minute", "minutes");
+    $("sl").textContent = pl(s, "second", "seconds");
+    document.title = d + " " + pl(d, "day", "days") + " to go";
+    setTimeout(tick, 1000 - (Date.now() % 1000));
   }
-  frame();
+  var bg = document.querySelector(".bg");
+  if (!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)){
+    for (var k = 0; k < 16; k++){
+      var dot = document.createElement("i");
+      dot.className = "dot";
+      dot.style.cssText = "--x:" + (Math.random() * 100).toFixed(1) + "%;--s:" + (.25 + Math.random() * .55).toFixed(2) + "rem;--dur:" + (22 + Math.random() * 26).toFixed(1) + "s;--delay:-" + (Math.random() * 40).toFixed(1) + "s;--sway:" + (Math.random() * 10 - 5).toFixed(1) + "vw";
+      bg.appendChild(dot);
+    }
+  }
+  tick();
 })();
 </script>
 </body>
